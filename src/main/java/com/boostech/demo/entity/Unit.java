@@ -9,9 +9,8 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "units")
-
-public class Unit extends BaseEntity{
+@Table(name = "unit")
+public class Unit extends BaseEntity {
     @Column(name = "name", unique = true, nullable = false)
     private String unitName;
 

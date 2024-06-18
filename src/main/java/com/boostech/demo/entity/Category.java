@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "Category")
+@Table(name = "category")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,6 +18,6 @@ public class Category extends BaseEntity {
 
     @ElementCollection
     @CollectionTable(name = "Attribute", joinColumns = @JoinColumn(name = "id"))
-    @Column(name = "id")
+    @Column(name = "attributes")
     private List<UUID> attributes;
 }

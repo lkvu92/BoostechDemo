@@ -19,7 +19,8 @@ public class ProductController {
 
     @GetMapping()
     public ResponseEntity<List<Product>> getAllProducts() throws ExecutionException, InterruptedException {
-        return new ResponseEntity<>(productService.getAllProducts().get(), HttpStatus.OK);
+        //return new ResponseEntity<>(productService.getAllProducts().get(), HttpStatus.OK);
+        return new ResponseEntity<>(productService.getAllProducts(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -29,7 +30,8 @@ public class ProductController {
 
     @PostMapping()
     public ResponseEntity<Product> saveProduct(@RequestBody Product product) throws ExecutionException, InterruptedException {
-        return new ResponseEntity<>(productService.saveProduct(product).get(), HttpStatus.CREATED);
+        //return new ResponseEntity<>(productService.saveProduct(product).get(), HttpStatus.CREATED);
+        return new ResponseEntity<>(productService.saveProduct(product), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
@@ -40,6 +42,7 @@ public class ProductController {
         }
         existingProduct.setName(product.getName());
         existingProduct.setCategory(product.getCategory());
-        return new ResponseEntity<>(productService.saveProduct(existingProduct).get(), HttpStatus.OK);
+       // return new ResponseEntity<>(productService.saveProduct(existingProduct).get(), HttpStatus.OK);
+        return new ResponseEntity<>(productService.saveProduct(existingProduct), HttpStatus.OK);
     }
 }

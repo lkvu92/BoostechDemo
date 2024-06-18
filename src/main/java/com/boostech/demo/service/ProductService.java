@@ -16,9 +16,11 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
-    @Async
-    public CompletableFuture<List<Product>> getAllProducts() {
-        return CompletableFuture.completedFuture(productRepository.findAll());
+    //@Async
+   //public CompletableFuture<List<Product>> getAllProducts() {
+    public List<Product> getAllProducts() {
+        //return CompletableFuture.completedFuture(productRepository.findAll());
+        return productRepository.findAll();
     }
 
     @Async
@@ -26,9 +28,15 @@ public class ProductService {
         return CompletableFuture.completedFuture(productRepository.findById(id).orElse(null));
     }
 
-    @Async
-    public CompletableFuture<Product> saveProduct(Product product) {
-        return CompletableFuture.completedFuture(productRepository.save(product));
+    //@Async
+   // public CompletableFuture<Product> saveProduct(Product product) {
+    public Product saveProduct(Product product) {
+        for (long i = 0; i < 6122470; i++) {
+            System.out.println("Printing " + i);
+        }
+       // return CompletableFuture.completedFuture(productRepository.save(product));
+
+        return productRepository.save(product);
     }
 
     @Async
