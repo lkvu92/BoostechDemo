@@ -28,6 +28,9 @@ public class BaseEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Column(name = "is_active")
+    private boolean isActive = true;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

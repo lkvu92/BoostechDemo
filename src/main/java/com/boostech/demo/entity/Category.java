@@ -20,4 +20,5 @@ public class Category extends BaseEntity {
     @CollectionTable(name = "Attribute", joinColumns = @JoinColumn(name = "id"))
     @Column(name = "attributes")
     private List<UUID> attributes;
+
 }
