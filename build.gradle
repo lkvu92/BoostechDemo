@@ -10,8 +10,9 @@ sonar {
   properties {
     property "sonar.projectKey", "lkvu92_boostechdemo_77e59a9f-d518-4670-b4e7-f9cbd069055e"
     property "sonar.projectName", "boostechdemo"
-    property "sonar.sources", "src"
-    property "sonar.exclusions", "**/*.class"
+    property "sonar.sources", "src/main/java"
+    property "sonar.tests", "src/test/java"
+    property "sonar.exclusions", "**/*.class, **/*.xml"
   }
 }
 
