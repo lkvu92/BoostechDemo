@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +23,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import com.boostech.demo.dto.CreateValueByIdDto;
 import com.boostech.demo.dto.DeleteValueByIdDto;
 import com.boostech.demo.dto.FindAllProductByCategoryIdAndAttributeIdValuePairsDto;
+import com.boostech.demo.dto.UpdateValueByIdDto;
 import com.boostech.demo.entity.PValue;
 import com.boostech.demo.entity.Product;
 import com.boostech.demo.exception.AttributeNotFoundException;
@@ -82,21 +84,23 @@ public class PValueController {
 		
 	}
 	
-	@PatchMapping
+	@PatchMapping("{id}")
 	public ResponseEntity<?> updateValueById(
+			@PathVariable UUID id,
 			@RequestBody 
-			CreateValueByIdDto request) {
+			UpdateValueByIdDto request) {
+		
+		request.setId(id);
 		_pValueService.updateValueById(request);
 		
 		return ResponseEntity.ok().build();
 		
 	}
 	
-	@DeleteMapping
+	@DeleteMapping("{id}")
 	public ResponseEntity<?> deleteValueById(
-			@RequestBody 
-			DeleteValueByIdDto request) {
-		boolean delete = _pValueService.deleteValueById(request);
+			@PathVariable UUID id) {
+		boolean delete = _pValueService.deleteValueById(id);
 		
 		return ResponseEntity.ok().build();
 		

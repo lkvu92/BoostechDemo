@@ -11,6 +11,10 @@ public class PValueNotFoundException extends RuntimeException {
 	
 	public PValueNotFoundException() {}
 	
+	public PValueNotFoundException(UUID id) {
+		super(String.format("Not found value have id '%s'", id));
+	}
+	
 	public PValueNotFoundException(String fieldName, UUID value) {
 		super(String.format("Not found value have %s '%s'", fieldName, value));
 	}
