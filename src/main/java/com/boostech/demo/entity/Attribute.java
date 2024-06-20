@@ -22,8 +22,8 @@ public class Attribute extends BaseEntity {
     @Column(name = "name", unique = true, nullable = false)
     private String attributeName;
 
-    @OneToOne
-    @JoinColumn(name = "unit_id")
+    @OneToOne()
+    @JoinColumn(name = "unit_id", referencedColumnName = "id", nullable = true)
     private Unit unit;
 
     @ManyToMany(mappedBy = "attributes")
