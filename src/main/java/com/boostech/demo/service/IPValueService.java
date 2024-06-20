@@ -26,5 +26,5 @@ public interface IPValueService {
 	
 	void updateValueById(CreateValueByIdDto dto);
 	
-	void deleteValueById(DeleteValueByIdDto dto);
+	boolean deleteValueById(DeleteValueByIdDto dto);
 }

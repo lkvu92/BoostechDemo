@@ -5,12 +5,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.boostech.demo.dto.FindAllProductByCategoryIdAndAttributeIdValuePairsDto;
 import com.boostech.demo.dto.AttributeIdValuePair;
 import com.boostech.demo.dto.CreateValueByIdDto;
 import com.boostech.demo.dto.DeleteValueByIdDto;
+import com.boostech.demo.entity.Attribute;
 import com.boostech.demo.entity.PValue;
 import com.boostech.demo.entity.Product;
 import com.boostech.demo.exception.AttributeNotFoundException;
@@ -21,7 +23,6 @@ import com.boostech.demo.repository.PValueRepository;
 import com.boostech.demo.repository.ProductRepository;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -98,15 +99,15 @@ public class PValueService implements IPValueService {
 			throw new AttributeNotFoundException(dto.getAttributeId());
 		}
 		
-		String createQueryString = "INSERT INTO p_value (attribute_id, product_id, value)"
-	             + " VALUES (:attributeId, :productId, :value)";
 
-		Query createQuery = _entityManager.createNativeQuery(createQueryString)
-		    .setParameter("productId", dto.getProductId())
-		    .setParameter("attributeId", dto.getAttributeId())
-		    .setParameter("value", dto.getValue());
+		Product product = new Product();
+		product.setId(dto.getProductId());
+		Attribute attribute = new Attribute();
+		product.setId(dto.getAttributeId());
 		
-		createQuery.executeUpdate();
+		PValue value = new PValue(product, attribute, dto.getValue());
+		
+		_pValueRepository.save(value);
 	}
 
 	@Override
@@ -119,11 +120,21 @@ public class PValueService implements IPValueService {
 	}
 
 	@Override
-	public void deleteValueById(DeleteValueByIdDto dto) {
+	public boolean deleteValueById(DeleteValueByIdDto dto) {
 		PValue value = findByProductIdAndAttributeId(dto);
+		boolean delete = false;
 		
-		value.setDeletedAt(LocalDateTime.now());
+		if (value.getDeletedAt() != null) {
+			value.setDeletedAt(LocalDateTime.now());
+			delete = true;
+		}
+		else {
+			value.setDeletedAt(null);
+		}
+		
 		_pValueRepository.save(value);
+		
+		return delete;
 	}
 	
 }
