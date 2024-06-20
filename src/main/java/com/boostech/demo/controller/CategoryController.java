@@ -23,8 +23,13 @@ public class CategoryController {
     @GetMapping
     public ResponseEntity<CustomResponse<List<Category>>> getAllCategories() {
         List<Category> categories = categoryService.getAllCategories();
-        CustomResponse<List<Category>> response = new CustomResponse<>("Success", HttpStatus.OK.value(), categories);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        if (categories.isEmpty()) {
+            CustomResponse<List<Category>> response = new CustomResponse<>("No categories found", HttpStatus.NOT_FOUND.value(), null);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        } else {
+            CustomResponse<List<Category>> response = new CustomResponse<>("Success", HttpStatus.OK.value(), categories);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
     }
 
     /**
@@ -86,10 +91,16 @@ public class CategoryController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<CustomResponse<String>> deleteCategory(@PathVariable UUID id) {
-        categoryService.deleteCategory(id);
-        CustomResponse<String> response = new CustomResponse<>
-                ("Category deleted successfully", HttpStatus.OK.value(), null);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        try {
+            categoryService.deleteCategory(id);
+            CustomResponse<String> response = new CustomResponse<>
+                    ("Category deleted successfully", HttpStatus.OK.value(), null);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            CustomResponse<String> response = new CustomResponse<>
+                    (e.getMessage(), HttpStatus.BAD_REQUEST.value(), null);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
     }
 
     /**
@@ -99,11 +110,17 @@ public class CategoryController {
      * @param categoryDTO category data
      * @return category
      */
-    @PostMapping("/{id}/addAttributes")
+    @PostMapping("/addAttributes/{id}")
     public ResponseEntity<CustomResponse<Category>> addAttributesToCategory(@PathVariable UUID id, @RequestBody CategoryDTO categoryDTO) {
-        Category category = categoryService.addAttributesToCategory(id, categoryDTO.getAttributeIds());
-        CustomResponse<Category> response = new CustomResponse<>("Success", HttpStatus.OK.value(), category);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        try {
+            Category category = categoryService.addAttributesToCategory(id, categoryDTO.getAttributeIds());
+            CustomResponse<Category> response = new CustomResponse<>("Success", HttpStatus.OK.value(), category);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            CustomResponse<Category> response = new CustomResponse<>
+                    (e.getMessage(), HttpStatus.BAD_REQUEST.value(), null);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
     }
 
     /**
@@ -113,13 +130,19 @@ public class CategoryController {
      * @param categoryDTO category data
      * @return category
      */
-    @PostMapping("/{id}/removeAttributes")
+    @PostMapping("/removeAttributes/{id}")
     public ResponseEntity<CustomResponse<Category>> removeAttributesFromCategory(
             @PathVariable UUID id,
             @RequestBody CategoryDTO categoryDTO) {
-        Category category = categoryService.removeAttributesFromCategory(id, categoryDTO.getAttributeIds());
-        CustomResponse<Category> response = new CustomResponse<>
-                ("Success", HttpStatus.OK.value(), category);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        try {
+            Category category = categoryService.removeAttributesFromCategory(id, categoryDTO.getAttributeIds());
+            CustomResponse<Category> response = new CustomResponse<>
+                    ("Success", HttpStatus.OK.value(), category);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            CustomResponse<Category> response = new CustomResponse<>
+                    (e.getMessage(), HttpStatus.BAD_REQUEST.value(), null);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
     }
 }

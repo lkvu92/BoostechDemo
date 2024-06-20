@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,6 +23,10 @@ public class CategoryService {
     @Autowired
     private AttributeRepository attributeRepository;
 
+    /**
+     * Get all categories
+     * @return
+     */
     public List<Category> getAllCategories() {
         return categoryRepository.findAll();
     }
@@ -66,58 +71,95 @@ public class CategoryService {
 
     /**
      * Delete a category
-     * @param id
+     * @param id UUID
      */
     public void deleteCategory(UUID id) {
-        categoryRepository.deleteById(id);
+        Optional<Category> categoryOpt = categoryRepository.findById(id);
+        if (categoryOpt.isPresent()) {
+            Category category = categoryOpt.get();
+            if (category.getDeletedAt() != null) {
+                throw new RuntimeException("Category already deleted");
+            }
+            category.setDeletedAt(LocalDateTime.now());
+            categoryRepository.save(category);
+        } else {
+            throw new RuntimeException("Category not found");
+        }
     }
 
     /**
      * Add attributes to a category
      * @param categoryId UUID
-     * @param attributeIds [attributeId1, attributeId2, ...]
+     * @param attributeIds List of UUID
      * @return
      */
     @Transactional
     public Category addAttributesToCategory(UUID categoryId, List<UUID> attributeIds) {
-        Optional<Category> categoryOpt = categoryRepository.findById(categoryId);
-        if (categoryOpt.isPresent()) {
-            Category category = categoryOpt.get();
-            for (UUID attributeId : attributeIds) {
-                Optional<Attribute> attributeOpt = attributeRepository.findById(attributeId);
-                if (attributeOpt.isPresent()) {
-                    Attribute attribute = attributeOpt.get();
-
-                    // Add the attribute to the category if it is not already present
-                    if (!category.getAttributes().contains(attribute)) {
-                        category.addAttribute(attribute);
-                    }
-                }
-            }
-            return categoryRepository.save(category);
-        } else {
-            throw new RuntimeException("Category not found");
-        }
+        return modifyAttributesInCategory(categoryId, attributeIds, true);
     }
 
     /**
      * Remove attributes from a category
-     * @param categoryId
-     * @param attributeIds
+     * @param categoryId UUID
+     * @param attributeIds List of UUID
      * @return
      */
     @Transactional
     public Category removeAttributesFromCategory(UUID categoryId, List<UUID> attributeIds) {
-        Optional<Category> categoryOpt = categoryRepository.findById(categoryId);
-        if (categoryOpt.isPresent()) {
-            Category category = categoryOpt.get();
-            for (UUID attributeId : attributeIds) {
-                Optional<Attribute> attributeOpt = attributeRepository.findById(attributeId);
-                attributeOpt.ifPresent(category::removeAttribute);
+        return modifyAttributesInCategory(categoryId, attributeIds, false);
+    }
+
+    /**
+     * Modify attributes in category
+     * @param categoryId
+     * @param attributeIds
+     * @param isAdding
+     * @return
+     */
+    private Category modifyAttributesInCategory(UUID categoryId, List<UUID> attributeIds, boolean isAdding) {
+        Category category = getCategoryOrThrow(categoryId);
+        attributeIds.forEach(attributeId -> modifyAttributeInCategory(category, attributeId, isAdding));
+        return categoryRepository.save(category);
+    }
+
+    /**
+     * Modify attribute in category
+     * @param category
+     * @param attributeId
+     * @param isAdding
+     */
+    private void modifyAttributeInCategory(Category category, UUID attributeId, boolean isAdding) {
+        Attribute attribute = getAttributeOrThrow(attributeId);
+        if (isAdding) {
+            if (category.getAttributes().contains(attribute)) {
+                throw new RuntimeException("Attribute already added to the category");
             }
-            return categoryRepository.save(category);
+            category.addAttribute(attribute);
         } else {
-            throw new RuntimeException("Category not found");
+            if (!category.getAttributes().contains(attribute)) {
+                throw new RuntimeException("Attribute not found in the category");
+            }
+            category.removeAttribute(attribute);
         }
+    }
+
+    /**
+     * Get category by id or throw exception
+     * @param categoryId UUID
+     * @return
+     */
+    private Category getCategoryOrThrow(UUID categoryId) {
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+    }
+
+    /**
+     * Get attribute by id or throw exception
+     * @param attributeId
+     * @return
+     */
+    private Attribute getAttributeOrThrow(UUID attributeId) {
+        return attributeRepository.findById(attributeId)
+                .orElseThrow(() -> new RuntimeException("Attribute not found"));
     }
 }
