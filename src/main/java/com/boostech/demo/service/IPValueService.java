@@ -3,6 +3,7 @@ package com.boostech.demo.service;
 import java.util.List;
 import java.util.UUID;
 
+import com.boostech.demo.dto.CreateValueByIdDto;
 import com.boostech.demo.dto.FindAllProductByCategoryIdAndAttributeIdValuePairsDto;
 import com.boostech.demo.entity.PValue;
 import com.boostech.demo.entity.Product;
@@ -19,4 +20,6 @@ public interface IPValueService {
 	List<PValue> findAllByProductIdList(List<UUID> productIdList);
 	
 	List<Product> findAllProductByCategoryIdAndAttributeIdAndValue(FindAllProductByCategoryIdAndAttributeIdValuePairsDto dto);
+
+	void createValueById(CreateValueByIdDto dto);
 }

@@ -9,19 +9,24 @@ import org.springframework.stereotype.Service;
 
 import com.boostech.demo.dto.FindAllProductByCategoryIdAndAttributeIdValuePairsDto;
 import com.boostech.demo.dto.AttributeIdValuePair;
+import com.boostech.demo.dto.CreateValueByIdDto;
 import com.boostech.demo.entity.Attribute;
 import com.boostech.demo.entity.PValue;
 import com.boostech.demo.entity.PValuePrimaryKey;
 import com.boostech.demo.entity.Product;
+import com.boostech.demo.exception.PValueConflictException;
 import com.boostech.demo.exception.PValueNotFoundException;
 import com.boostech.demo.repository.PValueRepository;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PValueService implements IPValueService {
 	private final PValueRepository _pValueRepository;
 	private final EntityManager _entityManager;
@@ -88,6 +93,33 @@ public class PValueService implements IPValueService {
 	    
 	    
 	   return  query.getResultList();
+	}
+
+	@Override
+	@Transactional
+	public void createValueById(CreateValueByIdDto dto) {
+		String checkExistQueryString = "select v from PValue v where v.valueId.product.id = :productId and v.valueId.attribute.id = :attributeId";
+		
+		TypedQuery<PValue> checkExistQuery = _entityManager.createQuery(checkExistQueryString, PValue.class);
+		
+		checkExistQuery.setParameter("productId", dto.getProductId());
+	    checkExistQuery.setParameter("attributeId", dto.getAttributeId());
+		
+		List<PValue> values =  checkExistQuery.getResultList();
+		
+		if (values.size() > 0) {
+			throw new PValueConflictException(String.format("Value existed on attribute id: '%s' and product id: '%s'", dto.getAttributeId().toString(), dto.getProductId().toString()));
+		}
+		
+		String createQueryString = "INSERT INTO p_value (attribute_id, product_id, value)"
+	             + " VALUES (:attributeId, :productId, :value)";
+
+		Query createQuery = _entityManager.createNativeQuery(createQueryString)
+		    .setParameter("productId", dto.getProductId())
+		    .setParameter("attributeId", dto.getAttributeId())
+		    .setParameter("value", dto.getValue());
+		
+		createQuery.executeUpdate();
 	}
 
 }
