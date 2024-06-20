@@ -1,5 +1,6 @@
 package com.boostech.demo.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -10,13 +11,18 @@ import org.springframework.stereotype.Service;
 import com.boostech.demo.dto.FindAllProductByCategoryIdAndAttributeIdValuePairsDto;
 import com.boostech.demo.dto.AttributeIdValuePair;
 import com.boostech.demo.dto.CreateValueByIdDto;
+import com.boostech.demo.dto.DeleteValueByIdDto;
 import com.boostech.demo.entity.Attribute;
 import com.boostech.demo.entity.PValue;
 import com.boostech.demo.entity.PValuePrimaryKey;
 import com.boostech.demo.entity.Product;
+import com.boostech.demo.exception.AttributeNotFoundException;
 import com.boostech.demo.exception.PValueConflictException;
 import com.boostech.demo.exception.PValueNotFoundException;
+import com.boostech.demo.exception.ProductNotFoundException;
+import com.boostech.demo.repository.IAttributeRepository;
 import com.boostech.demo.repository.PValueRepository;
+import com.boostech.demo.repository.ProductRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
@@ -29,15 +35,17 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class PValueService implements IPValueService {
 	private final PValueRepository _pValueRepository;
+	private final IAttributeRepository _attributeRepository;
+	private final ProductRepository _productRepository;
 	private final EntityManager _entityManager;
 	
 	@Override
-	public PValue findById(UUID attributeId, UUID productId) {
+	public PValue findById(DeleteValueByIdDto dto) {
 		Attribute attribute = new Attribute();
-		attribute.setId(attributeId);
+		attribute.setId(dto.getAttributeId());
 		
 		Product product = new Product();
-		product.setId(productId);
+		product.setId(dto.getProductId());
 		
 		PValuePrimaryKey valueId = new PValuePrimaryKey();
 		valueId.setAttribute(attribute);
@@ -49,7 +57,7 @@ public class PValueService implements IPValueService {
 		Optional<PValue> pValueOptional = _pValueRepository.findOne(Example.of(pValue));
 		
 		if (pValueOptional.isEmpty()) {
-			throw new PValueNotFoundException(attributeId, productId);
+			throw new PValueNotFoundException(dto.getAttributeId(), dto.getProductId());
 		}
 		
 		return pValueOptional.get();
@@ -111,6 +119,14 @@ public class PValueService implements IPValueService {
 			throw new PValueConflictException(String.format("Value existed on attribute id: '%s' and product id: '%s'", dto.getAttributeId().toString(), dto.getProductId().toString()));
 		}
 		
+		if (!_productRepository.existsById(dto.getProductId())) {
+			throw new ProductNotFoundException(dto.getProductId());
+		}
+		
+		if (!_attributeRepository.existsById(dto.getAttributeId())) {
+			throw new AttributeNotFoundException(dto.getAttributeId());
+		}
+		
 		String createQueryString = "INSERT INTO p_value (attribute_id, product_id, value)"
 	             + " VALUES (:attributeId, :productId, :value)";
 
@@ -122,4 +138,21 @@ public class PValueService implements IPValueService {
 		createQuery.executeUpdate();
 	}
 
+	@Override
+	public void updateValueById(CreateValueByIdDto dto) {
+		DeleteValueByIdDto keys = new DeleteValueByIdDto(dto.getProductId(), dto.getAttributeId());
+		PValue value = findById(keys);
+		
+		value.setValue(dto.getValue());
+		_pValueRepository.save(value);
+	}
+
+	@Override
+	public void deleteValueById(DeleteValueByIdDto dto) {
+		PValue value = findById(dto);
+		
+		value.setDeletedAt(LocalDateTime.now());
+		_pValueRepository.save(value);
+	}
+	
 }
