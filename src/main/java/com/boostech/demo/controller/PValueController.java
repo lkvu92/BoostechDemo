@@ -96,7 +96,7 @@ public class PValueController {
 	public ResponseEntity<?> deleteValueById(
 			@RequestBody 
 			DeleteValueByIdDto request) {
-		_pValueService.deleteValueById(request);
+		boolean delete = _pValueService.deleteValueById(request);
 		
 		return ResponseEntity.ok().build();
 		
