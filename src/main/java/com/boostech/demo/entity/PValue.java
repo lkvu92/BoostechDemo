@@ -9,8 +9,8 @@ import lombok.Data;
 @Table(name = "p_value")
 public class PValue {
 	@EmbeddedId
-    private PValuePrimaryKey valuePrimaryKey;
-
+    private PValuePrimaryKey valueId;
+	
     @Column(name = "value")
 	private String value;
 	

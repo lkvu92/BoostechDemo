@@ -2,7 +2,6 @@ package com.boostech.demo.entity;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.UUID;
 
 import jakarta.persistence.*;
 import lombok.Data;
