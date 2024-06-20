@@ -17,6 +17,7 @@ import com.boostech.demo.entity.Product;
 import com.boostech.demo.exception.PValueConflictException;
 import com.boostech.demo.exception.PValueNotFoundException;
 import com.boostech.demo.exception.ProductNotFoundException;
+import com.boostech.demo.repository.IAttributeRepository;
 import com.boostech.demo.repository.PValueRepository;
 import com.boostech.demo.repository.ProductRepository;
 
