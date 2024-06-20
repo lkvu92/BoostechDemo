@@ -3,9 +3,12 @@ package com.boostech.demo.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.util.List;
 
+/**
+ * CustomProductResponse class for custom method get products advanced
+ * @param <T>
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

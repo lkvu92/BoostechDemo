@@ -32,9 +32,9 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    public Product getProductById(UUID id) {
+    public Product getProductById(UUID id,boolean status) {
         Product product = productRepository.findById(id).orElse(null);
-        if (product != null && product.getDeletedAt() == null){
+        if (product != null && (status && product.getDeletedAt() == null || !status && product.getDeletedAt() != null)) {
             return product;
         }
         return null;
@@ -79,31 +79,45 @@ public class ProductService {
         }else {
             product.setDeletedAt(LocalDateTime.now());
         }
+
         productRepository.save(product);
         return product;
     }
 
+    /**
+     * Get products with advanced search.
+     *
+     * @param name    Product name
+     * @param page    Page number
+     * @param limit   Number of items per page
+     * @param sortBy  Sort by field
+     * @param sortType Sort type (asc or desc)
+     * @param status  Product status
+     * @return CustomProductResponse object
+     */
     public CustomProductResponse<Product> getProductsAdvanced(String name, int page, int limit, String sortBy, String sortType, boolean status) {
         Pageable pageable = sortType.equals("desc") ?
                 PageRequest.of(page, limit, Sort.by(Sort.Order.desc(sortBy))) :
                 PageRequest.of(page, limit, Sort.by(Sort.Order.asc(sortBy)));
         Page<Product> productPage;
         if (name != null && !name.isEmpty()) {
-            if(!status){
-                productPage = productRepository.findBySearchTerm(name, pageable);
-            }else{
-                productPage = productRepository.findBySearchTermActive(name, pageable);
-            }
+            productPage = !status ?
+                    productRepository.findBySearchTerm(name, pageable) :
+                    productRepository.findBySearchTermActive(name, pageable);
         } else {
-            if(!status){
-                productPage = productRepository.findAll(pageable);
-            }else {
-                productPage = productRepository.findAllByDeletedAtIsNull(pageable);
-            }
+            productPage = !status ?
+                    productRepository.findAll(pageable) :
+                    productRepository.findAllByDeletedAtIsNull(pageable);
         }
         return createCustomResponse(productPage);
     }
 
+    /**
+     * Create a custom response for the product.
+     *
+     * @param page Page object
+     * @return CustomProductResponse object
+     */
     private CustomProductResponse<Product> createCustomResponse(Page<Product> page) {
         CustomProductResponse<Product> response = new CustomProductResponse<>();
         response.setData(page.getContent());
@@ -120,6 +134,12 @@ public class ProductService {
         return response;
     }
 
+    /**
+     * Construct the URL for the next and previous pages.
+     *
+     * @param pageable Pageable object
+     * @return URL for the next or previous page
+     */
     private String constructPageUrl(Pageable pageable) {
         return "/api/products?page=" + pageable.getPageNumber() + "&size=" + pageable.getPageSize();
     }
