@@ -16,7 +16,9 @@ import com.boostech.demo.entity.PValuePrimaryKey;
 import com.boostech.demo.entity.Product;
 import com.boostech.demo.exception.PValueConflictException;
 import com.boostech.demo.exception.PValueNotFoundException;
+import com.boostech.demo.exception.ProductNotFoundException;
 import com.boostech.demo.repository.PValueRepository;
+import com.boostech.demo.repository.ProductRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
@@ -29,6 +31,8 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class PValueService implements IPValueService {
 	private final PValueRepository _pValueRepository;
+	private final IAttributeRepository _attributeRepository;
+	private final ProductRepository _productRepository;
 	private final EntityManager _entityManager;
 	
 	@Override
@@ -109,6 +113,14 @@ public class PValueService implements IPValueService {
 		
 		if (values.size() > 0) {
 			throw new PValueConflictException(String.format("Value existed on attribute id: '%s' and product id: '%s'", dto.getAttributeId().toString(), dto.getProductId().toString()));
+		}
+		
+		if (!_productRepository.existsById(dto.getProductId())) {
+			throw new ProductNotFoundException(dto.getProductId());
+		}
+		
+		if (!_attributeRepository.existsById(dto.getAttributeId())) {
+			throw new ProductNotFoundException(dto.getAttributeId());
 		}
 		
 		String createQueryString = "INSERT INTO p_value (attribute_id, product_id, value)"
