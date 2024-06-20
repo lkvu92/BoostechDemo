@@ -4,12 +4,14 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
 @Table(name = "p_value")
 @EqualsAndHashCode(callSuper=true)
 @AllArgsConstructor
+@NoArgsConstructor
 public class PValue extends BaseEntity {
 	@ManyToOne
 	@JoinColumn(name = "product_id")

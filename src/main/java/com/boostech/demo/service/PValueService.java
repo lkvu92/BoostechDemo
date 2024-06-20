@@ -90,20 +90,20 @@ public class PValueService implements IPValueService {
 
 	@Override
 	@Transactional
-	public void createValueById(CreateValueByIdDto dto) {	
-		if (!_productRepository.existsById(dto.getProductId())) {
+	public void createValueById(CreateValueByIdDto dto) {
+		Optional<Product> productOptional = _productRepository.findById(dto.getProductId());
+		if (productOptional.isEmpty()) {
 			throw new ProductNotFoundException(dto.getProductId());
 		}
 		
-		if (!_attributeRepository.existsById(dto.getAttributeId())) {
+		Optional<Attribute> attributeOptional = _attributeRepository.findById(dto.getAttributeId());
+		if (attributeOptional.isEmpty()) {
 			throw new AttributeNotFoundException(dto.getAttributeId());
 		}
 		
 
-		Product product = new Product();
-		product.setId(dto.getProductId());
-		Attribute attribute = new Attribute();
-		product.setId(dto.getAttributeId());
+		Product product = productOptional.get();
+		Attribute attribute = attributeOptional.get();
 		
 		PValue value = new PValue(product, attribute, dto.getValue());
 		
