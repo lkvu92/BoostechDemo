@@ -1,14 +1,15 @@
 package com.boostech.demo.service;
 
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.boostech.demo.dto.FindAllProductByCategoryIdAndAttributeIdValuePairsDto;
+import com.boostech.demo.dto.UpdateValueByIdDto;
 import com.boostech.demo.dto.AttributeIdValuePair;
 import com.boostech.demo.dto.CreateValueByIdDto;
 import com.boostech.demo.dto.DeleteValueByIdDto;
@@ -111,17 +112,47 @@ public class PValueService implements IPValueService {
 	}
 
 	@Override
-	public void updateValueById(CreateValueByIdDto dto) {
-		DeleteValueByIdDto keys = new DeleteValueByIdDto(dto.getProductId(), dto.getAttributeId());
-		PValue value = findByProductIdAndAttributeId(keys);
+	public void updateValueById(UpdateValueByIdDto dto) {
+		Optional<PValue> valueOptional = _pValueRepository.findById(dto.getId());
+		
+		if (valueOptional.isEmpty()) {
+			throw new PValueNotFoundException(dto.getId());
+		}
+		
+		PValue value = valueOptional.get();
+		
+		if (dto.getProductId() != null) {
+			Optional<Product> productOptional = _productRepository.findById(dto.getProductId());
+			if (productOptional.isEmpty()) {
+				throw new ProductNotFoundException(dto.getProductId());
+			}
+			
+			value.setProduct(productOptional.get());
+		}
+		
+		if (dto.getAttributeId() != null) {
+			Optional<Attribute> attributeOptional = _attributeRepository.findById(dto.getAttributeId());
+			if (attributeOptional.isEmpty()) {
+				throw new AttributeNotFoundException(dto.getAttributeId());
+			}
+			
+			value.setAttribute(attributeOptional.get());
+		}
 		
 		value.setValue(dto.getValue());
+		
 		_pValueRepository.save(value);
 	}
 
 	@Override
-	public boolean deleteValueById(DeleteValueByIdDto dto) {
-		PValue value = findByProductIdAndAttributeId(dto);
+	public boolean deleteValueById(UUID id) {
+		Optional<PValue> valueOptional = _pValueRepository.findById(id);
+		
+		if (valueOptional.isEmpty()) {
+			throw new PValueNotFoundException(id);
+		}
+		
+		PValue value = valueOptional.get();
 		boolean delete = false;
 		
 		if (value.getDeletedAt() != null) {

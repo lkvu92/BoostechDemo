@@ -6,6 +6,7 @@ import java.util.UUID;
 import com.boostech.demo.dto.CreateValueByIdDto;
 import com.boostech.demo.dto.DeleteValueByIdDto;
 import com.boostech.demo.dto.FindAllProductByCategoryIdAndAttributeIdValuePairsDto;
+import com.boostech.demo.dto.UpdateValueByIdDto;
 import com.boostech.demo.entity.PValue;
 import com.boostech.demo.entity.Product;
 
@@ -24,7 +25,7 @@ public interface IPValueService {
 
 	void createValueById(CreateValueByIdDto dto);
 	
-	void updateValueById(CreateValueByIdDto dto);
+	void updateValueById(UpdateValueByIdDto dto);
 	
-	boolean deleteValueById(DeleteValueByIdDto dto);
+	boolean deleteValueById(UUID id);
 }
