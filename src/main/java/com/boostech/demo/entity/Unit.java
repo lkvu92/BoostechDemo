@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Data
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -16,4 +14,6 @@ public class Unit extends BaseEntity {
 
     @Column(name = "unit_type", nullable = false)
     private String unitType;
+
+
 }

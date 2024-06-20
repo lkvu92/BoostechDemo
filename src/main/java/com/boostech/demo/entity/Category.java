@@ -5,19 +5,33 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table(name = "category")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+
 public class Category extends BaseEntity {
     private String name;
 
-    @ElementCollection
-    @CollectionTable(name = "Attribute", joinColumns = @JoinColumn(name = "id"))
-    @Column(name = "attributes")
-    private List<UUID> attributes;
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "category_attribute",
+            joinColumns = @JoinColumn(name = "category_id"),
+            inverseJoinColumns = @JoinColumn(name = "attribute_id")
+    )
+    private List<Attribute> attributes = new ArrayList<>();
+
+    public void addAttribute(Attribute attribute) {
+        this.attributes.add(attribute);
+        attribute.getCategories().add(this);
+    }
+
+    public void removeAttribute(Attribute attribute) {
+        this.attributes.remove(attribute);
+        attribute.getCategories().remove(this);
+    }
 }
