@@ -9,6 +9,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,10 +18,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import com.boostech.demo.dto.CreateValueByIdDto;
 import com.boostech.demo.dto.FindAllProductByCategoryIdAndAttributeIdValuePairsDto;
 import com.boostech.demo.entity.PValue;
 import com.boostech.demo.entity.Product;
 import com.boostech.demo.exception.ErrorInfo;
+import com.boostech.demo.exception.PValueConflictException;
 import com.boostech.demo.exception.PValueNotFoundException;
 import com.boostech.demo.service.IPValueService;
 
@@ -68,10 +71,26 @@ public class PValueController {
 		
 	}
 	
+	@PostMapping
+	public ResponseEntity<?> createValueById(
+			@RequestBody 
+			CreateValueByIdDto request) {
+		_pValueService.createValueById(request);
+		
+		return new ResponseEntity<>(HttpStatus.CREATED);
+		
+	}
+	
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ExceptionHandler(PValueNotFoundException.class)
 	@ResponseBody ErrorInfo handlePValueNotFound(HttpServletRequest req, Exception ex) {
 	    return new ErrorInfo(HttpStatus.NOT_FOUND.value(), ex.getLocalizedMessage());
+	}
+	
+	@ResponseStatus(HttpStatus.CONFLICT)
+	@ExceptionHandler(PValueConflictException.class)
+	@ResponseBody ErrorInfo handlePValueConflict(HttpServletRequest req, Exception ex) {
+	    return new ErrorInfo(HttpStatus.CONFLICT.value(), ex.getLocalizedMessage());
 	}
 	
 	@ExceptionHandler({MethodArgumentTypeMismatchException.class, HttpMessageNotReadableException.class})
