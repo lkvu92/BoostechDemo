@@ -109,6 +109,7 @@ public class ProductService {
                     productRepository.findAll(pageable) :
                     productRepository.findAllByDeletedAtIsNull(pageable);
         }
+
         return createCustomResponse(productPage);
     }
 
