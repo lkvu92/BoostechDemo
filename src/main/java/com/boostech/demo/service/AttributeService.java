@@ -2,11 +2,15 @@ package com.boostech.demo.service;
 
 import com.boostech.demo.dto.AttributeDto;
 import com.boostech.demo.entity.Attribute;
+import com.boostech.demo.entity.Unit;
 import com.boostech.demo.repository.IAttributeRepository;
+import com.boostech.demo.repository.IUnitRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,6 +21,8 @@ import java.util.UUID;
 public class AttributeService implements IAttributeService {
 
     private final IAttributeRepository repository;
+    @Autowired
+    private IUnitRepository unitRepository;
 
     public List<Attribute> getAll() {
         return repository.findAll();
@@ -35,7 +41,8 @@ public class AttributeService implements IAttributeService {
         try {
             Attribute attribute = new Attribute();
             attribute.setAttributeName(attributeDto.getAttributeName());
-
+            Unit unit = unitRepository.findById(attributeDto.getUnitId()).orElse(null);
+            attribute.setUnit(unit);
             return repository.save(attribute);
         }catch (EntityNotFoundException e){
             throw new EntityNotFoundException(e.getMessage());
@@ -64,7 +71,7 @@ public class AttributeService implements IAttributeService {
             throw new EntityNotFoundException("Attribute not found.");
         }
 
-        existingAttribute.setActive(false);
+        existingAttribute.setDeletedAt(LocalDateTime.now());
         repository.save(existingAttribute);
     }
 }

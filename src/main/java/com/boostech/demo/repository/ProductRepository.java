@@ -18,4 +18,15 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     @Query(value = "SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) AND p.deletedAt IS NULL")
     Page<Product> findBySearchTermActive(@Param("name") String name, Pageable pageable);
+
+//    @Query("SELECT p FROM Product p " +
+//            "JOIN attribute a ON a.productId = p.id " +
+//            "JOIN p_value v ON v.attributeId = a.id " +
+//            "JOIN unit u ON u.valueId = v.id " +
+//            "WHERE p.categoryId = :categoryId " +
+//            "AND ( " +
+//            "   (:attributePairs) IS NULL OR " +
+//            "   (a.attributeId IN (:attributePairs)) " +
+//            ") ")
+//    List<Product> findByCategoryIdAndAttributes(UUID categoryId, List<Long> attributePairs);
 }

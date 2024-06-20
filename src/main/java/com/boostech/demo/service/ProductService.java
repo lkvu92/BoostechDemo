@@ -1,6 +1,8 @@
 package com.boostech.demo.service;
 
 import com.boostech.demo.dto.CustomProductResponse;
+import com.boostech.demo.dto.FindAllProductByCategoryIdAndAttributeIdValuePairsDto;
+import com.boostech.demo.dto.GetOneProductDto;
 import com.boostech.demo.dto.ProductCreateDto;
 import com.boostech.demo.entity.Category;
 import com.boostech.demo.entity.Product;
@@ -145,4 +147,8 @@ public class ProductService {
         return "/api/products?page=" + pageable.getPageNumber() + "&size=" + pageable.getPageSize();
     }
 
+    private List<GetOneProductDto> searchProductsByCategoryAndAttributes(FindAllProductByCategoryIdAndAttributeIdValuePairsDto dto) {
+
+        return null;
+    }
 }

@@ -7,6 +7,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -51,7 +52,7 @@ public class UnitService implements IUnitService {
 
            existingUnit.setUnitName(UUID.randomUUID().toString());
            existingUnit.setUnitType(unitDto.getUnitType());
-           existingUnit.setActive(unitDto.isActive());
+           existingUnit.setDeletedAt(LocalDateTime.now());
            return repository.save(existingUnit);
 
        }catch (Exception e){
@@ -64,7 +65,7 @@ public class UnitService implements IUnitService {
         if (existingUnit == null) {
             throw new EntityNotFoundException("Unit not found");
         }
-        existingUnit.setActive(false);
+        existingUnit.setDeletedAt(LocalDateTime.now());
         repository.save(existingUnit);
     }
 }
