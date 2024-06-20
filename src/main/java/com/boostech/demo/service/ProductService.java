@@ -19,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -164,15 +165,18 @@ public class ProductService {
         categoryDto.setId(product.getCategory().getId());
         categoryDto.setName(product.getCategory().getName());
         dto.setCategory(categoryDto);
-        GetOneProductDto.AttributeDto attributeDto = new GetOneProductDto.AttributeDto();
-        List<PValue> listPValue = pValueRepository.findAllByValueId_ProductIdIn(List.of(productId));
+
+        List<PValue> listPValue = pValueRepository.findAllByProductIdIn(List.of(productId));
         for (PValue pValue : listPValue) {
-            attributeDto.setId(pValue.getValueId().getAttribute().getId());
-            attributeDto.setName(pValue.getValueId().getAttribute().getAttributeName());
+            GetOneProductDto.AttributeDto attributeDto = new GetOneProductDto.AttributeDto();
+            attributeDto.setId(pValue.getAttribute().getId());
+            attributeDto.setName(pValue.getAttribute().getAttributeName());
             attributeDto.setValue(pValue.getValue());
-            attributeDto.setUnit(pValue.getValueId().getAttribute().getUnit().getUnitName());
+            attributeDto.setUnit(pValue.getAttribute().getUnit().getUnitName());
+
+            dto.getAttributes().add(attributeDto);
         }
-        dto.setAttributes(List.of(attributeDto));
+
         return dto;
     }
 }

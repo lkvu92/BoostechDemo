@@ -44,9 +44,16 @@ public class PValueController {
 	private final IPValueService _pValueService;
 	
 	@GetMapping
-	public ResponseEntity<PValue> findByProductIdAndAttributeId(@RequestBody DeleteValueByIdDto request) {
-		PValue value = _pValueService.findByProductIdAndAttributeId(request);
+	public ResponseEntity<List<PValue>> findByProductIdAndAttributeId(@RequestBody DeleteValueByIdDto request) {
+		List<PValue> values = _pValueService.findByProductIdAndAttributeId(request);
 		
+		return ResponseEntity.ok(values);
+	}
+
+	@GetMapping("{id}")
+	public ResponseEntity<PValue> findById(@PathVariable UUID id) {
+		PValue value = _pValueService.findById(id);
+
 		return ResponseEntity.ok(value);
 	}
 	

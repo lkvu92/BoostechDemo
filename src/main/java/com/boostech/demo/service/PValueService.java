@@ -36,17 +36,23 @@ public class PValueService implements IPValueService {
 	private final IAttributeRepository _attributeRepository;
 	private final ProductRepository _productRepository;
 	private final EntityManager _entityManager;
-	
+
 	@Override
-	public PValue findByProductIdAndAttributeId(DeleteValueByIdDto dto) {
-		
-		Optional<PValue> pValueOptional = _pValueRepository.findByProductIdAndAttributeIdAndDeletedAtIsNull(dto.getProductId(), dto.getAttributeId());
-		
+	public PValue findById(UUID id) {
+		Optional<PValue> pValueOptional = _pValueRepository.findById(id);
+
 		if (pValueOptional.isEmpty()) {
-			throw new PValueNotFoundException(dto.getAttributeId(), dto.getProductId());
+			throw new PValueNotFoundException(id);
 		}
-		
+
 		return pValueOptional.get();
+	}
+
+	@Override
+	public List<PValue>findByProductIdAndAttributeId(DeleteValueByIdDto dto) {
+		List<PValue> values = _pValueRepository.findByProductIdAndAttributeIdAndDeletedAtIsNull(dto.getProductId(), dto.getAttributeId());
+
+		return values;
 	}
 
 	@Override

@@ -29,4 +29,6 @@ public class Attribute extends BaseEntity {
     @ManyToMany(mappedBy = "attributes")
     private List<Category> categories = new ArrayList<>();
 
+    @OneToMany
+    List<PValue> values = new ArrayList<>();
 }

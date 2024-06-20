@@ -11,7 +11,8 @@ import com.boostech.demo.entity.PValue;
 import com.boostech.demo.entity.Product;
 
 public interface IPValueService {
-	PValue findByProductIdAndAttributeId(DeleteValueByIdDto dto);
+	PValue findById(UUID id);
+	List<PValue> findByProductIdAndAttributeId(DeleteValueByIdDto dto);
 	
 //	PValue findByAttributeId(UUID attributeId);
 //	

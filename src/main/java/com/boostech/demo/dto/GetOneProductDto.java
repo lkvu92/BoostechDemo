@@ -3,6 +3,8 @@ package com.boostech.demo.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,7 +15,7 @@ public class GetOneProductDto {
     private UUID id;
     private String name;
     private CategoryDto category;
-    private List<AttributeDto> attributes;
+    private List<AttributeDto> attributes = new ArrayList<>();
 
         @Data
     @AllArgsConstructor

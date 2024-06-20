@@ -12,8 +12,9 @@ import com.boostech.demo.entity.PValue;
 public interface PValueRepository extends JpaRepository<PValue, UUID> {
 //	Optional<PValue> findByValueId_ProductId(UUID productId);
 //	Optional<PValue> findByValueId_AttributeId(UUID attributeId);
-	Optional<PValue> findByProductIdAndAttributeIdAndDeletedAtIsNull(UUID productId, UUID attributeId);
+	List<PValue> findByProductIdAndAttributeIdAndDeletedAtIsNull(UUID productId, UUID attributeId);
 	List<PValue> findAllByAttributeIdIn(List<UUID> attributeIdList);
+	//List<PValue> findAllByProductIdIn(List<UUID> productIdList);
 	List<PValue> findAllByProductIdIn(List<UUID> productIdList);
 	
 //	@Procedure(procedureName = "FILTER_PRODUCT")
