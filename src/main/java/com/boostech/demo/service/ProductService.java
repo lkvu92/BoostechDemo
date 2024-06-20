@@ -4,9 +4,12 @@ import com.boostech.demo.dto.CustomProductResponse;
 import com.boostech.demo.dto.FindAllProductByCategoryIdAndAttributeIdValuePairsDto;
 import com.boostech.demo.dto.GetOneProductDto;
 import com.boostech.demo.dto.ProductCreateDto;
+import com.boostech.demo.entity.Attribute;
 import com.boostech.demo.entity.Category;
+import com.boostech.demo.entity.PValue;
 import com.boostech.demo.entity.Product;
 import com.boostech.demo.repository.CategoryRepository;
+import com.boostech.demo.repository.PValueRepository;
 import com.boostech.demo.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,6 +27,8 @@ public class ProductService {
     private final ProductRepository productRepository;
     @Autowired
     private CategoryRepository categoryRepository;
+    @Autowired
+    private PValueRepository pValueRepository;
 
     public ProductService(ProductRepository productRepository) {
         this.productRepository = productRepository;
@@ -147,8 +152,27 @@ public class ProductService {
         return "/api/products?page=" + pageable.getPageNumber() + "&size=" + pageable.getPageSize();
     }
 
-    private List<GetOneProductDto> searchProductsByCategoryAndAttributes(FindAllProductByCategoryIdAndAttributeIdValuePairsDto dto) {
-
-        return null;
+    public GetOneProductDto getOneProductDtos(UUID productId) {
+        Product product = productRepository.findById(productId).orElse(null);
+        if (product == null) {
+            return null;
+        }
+        GetOneProductDto dto = new GetOneProductDto();
+        dto.setId(product.getId());
+        dto.setName(product.getName());
+        GetOneProductDto.CategoryDto categoryDto = new GetOneProductDto.CategoryDto();
+        categoryDto.setId(product.getCategory().getId());
+        categoryDto.setName(product.getCategory().getName());
+        dto.setCategory(categoryDto);
+        GetOneProductDto.AttributeDto attributeDto = new GetOneProductDto.AttributeDto();
+        List<PValue> listPValue = pValueRepository.findAllByValueId_ProductIdIn(List.of(productId));
+        for (PValue pValue : listPValue) {
+            attributeDto.setId(pValue.getValueId().getAttribute().getId());
+            attributeDto.setName(pValue.getValueId().getAttribute().getAttributeName());
+            attributeDto.setValue(pValue.getValue());
+            attributeDto.setUnit(pValue.getValueId().getAttribute().getUnit().getUnitName());
+        }
+        dto.setAttributes(List.of(attributeDto));
+        return dto;
     }
 }

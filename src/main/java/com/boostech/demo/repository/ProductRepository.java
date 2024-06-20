@@ -20,13 +20,10 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     Page<Product> findBySearchTermActive(@Param("name") String name, Pageable pageable);
 
 //    @Query("SELECT p FROM Product p " +
-//            "JOIN attribute a ON a.productId = p.id " +
-//            "JOIN p_value v ON v.attributeId = a.id " +
-//            "JOIN unit u ON u.valueId = v.id " +
-//            "WHERE p.categoryId = :categoryId " +
-//            "AND ( " +
-//            "   (:attributePairs) IS NULL OR " +
-//            "   (a.attributeId IN (:attributePairs)) " +
-//            ") ")
-//    List<Product> findByCategoryIdAndAttributes(UUID categoryId, List<Long> attributePairs);
+//            "JOIN Category  c ON p.category.id = c.id " +
+//            "JOIN PValue pv ON pv.valueId.product.id = p.id " +
+//            "JOIN Attribute a ON pv.valueId.attribute.id = a.id " +
+//            "JOIN Unit u ON a.unit.id = u.id " +
+//            "WHERE p.id = :productId ")
+//    List<Product> findByCategoryIdAndAttributes(UUID productId, List<Long> attributePairs);
 }

@@ -1,6 +1,7 @@
 package com.boostech.demo.controller;
 
 import com.boostech.demo.dto.CustomProductResponse;
+import com.boostech.demo.dto.GetOneProductDto;
 import com.boostech.demo.dto.ProductCreateDto;
 import com.boostech.demo.entity.Product;
 import com.boostech.demo.service.ProductService;
@@ -73,5 +74,9 @@ public class ProductController {
         }else{
             return new ResponseEntity<>(new CustomResponse<>("Product restored successfully", 200, null), HttpStatus.OK);
         }
+    }
+    @GetMapping("/abc/{id}")
+    public GetOneProductDto getoneproduct(@PathVariable UUID id) {
+        return productService.getOneProductDtos(id);
     }
 }

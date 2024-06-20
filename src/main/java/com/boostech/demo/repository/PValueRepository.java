@@ -14,7 +14,7 @@ public interface PValueRepository extends JpaRepository<PValue, PValuePrimaryKey
 //	Optional<PValue> findByValueId_AttributeId(UUID attributeId);
 	List<PValue> findAllByValueId_AttributeIdIn(List<UUID> attributeIdList);
 	List<PValue> findAllByValueId_ProductIdIn(List<UUID> productIdList);
-	
+	//List<PValue> findAllByValueId_ProductId(UUID productId);
 //	@Procedure(procedureName = "FILTER_PRODUCT")
 //	void filterProduct(Map<String, String> map);
 }
