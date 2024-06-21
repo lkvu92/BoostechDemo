@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeleteValueByIdDto {
-	private UUID productId;
+public class DeleteValueByProductIdAndAttributeIdDto {
 	private UUID attributeId;
+	private UUID productId;
 }

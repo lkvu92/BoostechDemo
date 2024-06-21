@@ -1,38 +1,35 @@
 package com.boostech.demo.service;
 
-import com.boostech.demo.dto.CustomProductResponse;
-import com.boostech.demo.dto.FindAllProductByCategoryIdAndAttributeIdValuePairsDto;
-import com.boostech.demo.dto.GetOneProductDto;
-import com.boostech.demo.dto.ProductCreateDto;
+import com.boostech.demo.dto.*;
+import com.boostech.demo.dto.reqDto.AttributeValueDto;
+import com.boostech.demo.dto.reqDto.ProductCreateDto;
 import com.boostech.demo.entity.Attribute;
 import com.boostech.demo.entity.Category;
 import com.boostech.demo.entity.PValue;
 import com.boostech.demo.entity.Product;
 import com.boostech.demo.repository.CategoryRepository;
+import com.boostech.demo.repository.IAttributeRepository;
 import com.boostech.demo.repository.PValueRepository;
 import com.boostech.demo.repository.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
-    @Autowired
-    private CategoryRepository categoryRepository;
-    @Autowired
-    private PValueRepository pValueRepository;
-
-    public ProductService(ProductRepository productRepository) {
-        this.productRepository = productRepository;
-    }
-
+    private final CategoryRepository categoryRepository;
+    private final PValueRepository pValueRepository;
+    private final IAttributeRepository attributeRepository;
+    private final IPValueService pValueService;
 
     public List<Product> getAllProducts() {
         return productRepository.findAll();
@@ -161,6 +158,11 @@ public class ProductService {
         if (product == null) {
             return null;
         }
+        GetOneProductDto dto = customResponse(product);
+        return dto;
+    }
+
+    private GetOneProductDto customResponse(Product product) {
         GetOneProductDto dto = new GetOneProductDto();
         dto.setId(product.getId());
         dto.setName(product.getName());
@@ -169,7 +171,7 @@ public class ProductService {
         categoryDto.setName(product.getCategory().getName());
         dto.setCategory(categoryDto);
 
-        List<PValue> listPValue = pValueRepository.findAllByProductIdIn(List.of(productId));
+        List<PValue> listPValue = pValueRepository.findAllByProductIdIn(List.of(product.getId()));
         for (PValue pValue : listPValue) {
             GetOneProductDto.AttributeDto attributeDto = new GetOneProductDto.AttributeDto();
             attributeDto.setId(pValue.getAttribute().getId());
@@ -184,27 +186,70 @@ public class ProductService {
     /**
      * Create product full version
      */
-    public Product createProductFullVersion(ProductCreateDto productCreateDto, List<Attribute> attributess) {
-       //input Product, List<Attribute>
-        List<Attribute> getAttributes = categoryRepository.findById(productCreateDto.getCate_id()).get().getAttributes();
-        //Check list attr isqual list attr in cate , if not return null
-        if(!compareListAttribute(getAttributes, attributess)){
-            return null;
+    @Transactional
+    public GetOneProductDto createProductFullVersion(ProductCreateDto productCreateDto) {
+        //validate product name
+        if (!productCreateDto.getName().isEmpty() && productRepository.existsByName(productCreateDto.getName())) {
+            throw new IllegalArgumentException("Product name already exists");
         }
-        //create transaction
-        //create list attribute
-        //Create product
+       //input Product, List<Attribute>
+        Optional<Category> categoryOptional = categoryRepository.findById(productCreateDto.getCate_id());
+        if (categoryOptional.isEmpty()) {
+            throw new IllegalArgumentException("Category not found");
+        }
+        Category category = categoryOptional.get();
+        List<Attribute> attributes = category.getAttributes();
+        //Check list attr isqual list attr in cate , if not return null
 
+        Map<UUID, Attribute> listAttributeOfCateMap = CheckListAttribute(attributes, productCreateDto.getAttributeValues());
+        if(listAttributeOfCateMap == null){
+            throw new IllegalArgumentException("Product's attributes are not valid");
+        }
+        //Create product
+        Optional<Category> cate = categoryRepository.findById(productCreateDto.getCate_id());
+        Product product = new Product();
+        product.setName(productCreateDto.getName());
+        product.setCategory(cate.get());
+        productRepository.save(product);
+        //Create list value
+        List<AttributeValueUnitTuple>  attributeIdValueUnitTuples = new ArrayList<>();
+        for (AttributeValueDto attributeValue : productCreateDto.getAttributeValues()) {
+            UUID attributeId = attributeValue.getAttributeId();
+            Attribute attribute = listAttributeOfCateMap.get(attributeId);
+            String value = attributeValue.getValue();
+            UUID unitId = attributeValue.getUnitId();
+
+            AttributeValueUnitTuple attributeValueUnitTuple = new AttributeValueUnitTuple(attribute, value, unitId);
+            attributeIdValueUnitTuples.add(attributeValueUnitTuple);
+        }
+
+        pValueService.createValueByProductIdAndAttributeIdValueUnitTuples(product, attributeIdValueUnitTuples);
+
+        GetOneProductDto productCustom = customResponse(product);
+        return productCustom;
+    }
+
+    @Transactional
+    public GetOneProductDto updateProductFullVersion(ProductCreateDto productCreateDto) {
         return null;
     }
 
-    private boolean compareListAttribute(List<Attribute> listAttributeOfCate, List<Attribute> listAttributeOfProduct){
-        Set<Attribute> listAttributeOfCateSet = new HashSet<>(listAttributeOfCate);
-        Set<Attribute> listAttributeOfProductSet = new HashSet<>(listAttributeOfProduct);
+    private Map<UUID, Attribute> CheckListAttribute(List<Attribute> listAttributeOfCate, List<AttributeValueDto> listAttributeOfProduct){
+        if(listAttributeOfCate.size() > listAttributeOfProduct.size()){
+            return null;
+        }
 
-        Set<Attribute> commonElements = new HashSet<>(listAttributeOfCateSet);
-        commonElements.retainAll(listAttributeOfProductSet);
+        Map<UUID, Attribute> listAttributeOfCateMap = new HashMap<>();
+        for (Attribute attribute : listAttributeOfCate) {
+            listAttributeOfCateMap.put(attribute.getId(), attribute);
+        }
 
-        return commonElements.size() == listAttributeOfCateSet.size();
+        for (AttributeValueDto attributedto : listAttributeOfProduct) {
+            if (!listAttributeOfCateMap.containsKey(attributedto.getAttributeId())) {
+                return null;
+            }
+        }
+
+        return listAttributeOfCateMap;
     }
 }

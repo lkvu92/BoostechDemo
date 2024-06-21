@@ -12,6 +12,7 @@ import java.util.UUID;
 public interface ProductRepository extends JpaRepository<Product, UUID> {
     List<Product> findProductsByCategory_Id(UUID categoryId);
     Page<Product> findAllByDeletedAtIsNull(Pageable pageable);
+    boolean existsByName(String name);
 
     @Query(value = "SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     Page<Product> findBySearchTerm(@Param("name") String name, Pageable pageable);

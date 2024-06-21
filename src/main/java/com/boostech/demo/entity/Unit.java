@@ -20,7 +20,7 @@ public class Unit extends BaseEntity {
     private String unitType;
 
     @JsonBackReference
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL) // Add cascade = CascadeType.PERSIST
     @JoinTable(
             name = "attribute_unit",
             joinColumns = @JoinColumn(name = "unit_id"),

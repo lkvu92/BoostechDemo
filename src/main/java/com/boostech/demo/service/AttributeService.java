@@ -43,12 +43,21 @@ public class AttributeService implements IAttributeService {
             Attribute attribute = new Attribute();
             attribute.setAttributeName(attributeDto.getAttributeName());
 
-            Unit unit = unitRepository.findById(attributeDto.getUnitId()).orElseThrow();
-            List<Unit> units = new ArrayList<>();
-            units.add(unit);
-            attribute.setUnits(units);
+            Optional<Unit> unitOptional = unitRepository.findById(attributeDto.getUnitId());
 
-            return repository.save(attribute);
+            if (unitOptional.isEmpty()) {
+                throw new EntityNotFoundException("Unit not found.");
+            }
+
+            Unit unit = unitOptional.get();
+
+            attribute.getUnits().add(unit);
+            repository.save(attribute);
+
+            unit.getAttributes().add(attribute);
+            unitRepository.save(unit);
+
+            return attribute;
         }catch (EntityNotFoundException e){
             throw new EntityNotFoundException(e.getMessage());
         }
@@ -60,15 +69,17 @@ public class AttributeService implements IAttributeService {
             if(existingAttribute == null){
                 throw new EntityNotFoundException("Attribute not found.");
             }
+            Optional<Unit> unitOptional = unitRepository.findById(attributeDto.getUnitId());
 
-            existingAttribute.setAttributeName(attributeDto.getAttributeName());
-            Unit unit = unitRepository.findById(attributeDto.getUnitId()).orElseThrow();
+            Unit unit = unitOptional.get();
 
-            List<Unit> unitList = new ArrayList<>();
-            unitList.add(unit);
+            existingAttribute.getUnits().add(unit);
+            repository.save(existingAttribute);
 
-            existingAttribute.getUnits().add(unit); // Thêm Unit mới
-            return repository.save(existingAttribute);
+            unit.getAttributes().add(existingAttribute);
+            unitRepository.save(unit);
+
+            return existingAttribute;
 
         }catch (EntityNotFoundException e){
             throw new EntityNotFoundException(e.getMessage());

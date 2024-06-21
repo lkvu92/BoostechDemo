@@ -1,8 +1,10 @@
 package com.boostech.demo.entity;
-import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
@@ -22,6 +24,6 @@ public class PValue extends BaseEntity {
     @Column(name = "value")
 	private String value;
 
-	@OneToOne()
+	@ManyToOne()
 	private Unit unit;
 }
