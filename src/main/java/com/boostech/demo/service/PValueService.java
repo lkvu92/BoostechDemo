@@ -7,10 +7,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.boostech.demo.dto.*;
-import com.boostech.demo.dto.resDto.FindByProductIdAndAttributeIdResponse;
+import com.boostech.demo.dto.resDto.FindAllProductByCategoryIdAndAttributeIdAndValueResponse;
+import com.boostech.demo.dto.resDto.FindPValueByIdResponse;
+import com.boostech.demo.dto.resDto.FindPValueByProductIdAndAttributeIdResponse;
+import com.boostech.demo.dto.resDto.FindPValuesByAttributeIdList;
+import com.boostech.demo.dto.resDto.FindPValuesByProductIdList;
 import com.boostech.demo.entity.Unit;
 import com.boostech.demo.repository.IUnitRepository;
-import lombok.Value;
 import org.springframework.stereotype.Service;
 
 import com.boostech.demo.entity.Attribute;
@@ -42,44 +45,85 @@ public class PValueService implements IPValueService {
 	private final IUnitRepository _unitRepository;
 
 	@Override
-	public PValue findById(UUID id) {
+	public FindPValueByIdResponse findById(UUID id) {
 		Optional<PValue> pValueOptional = _pValueRepository.findById(id);
 
 		if (pValueOptional.isEmpty()) {
 			throw new PValueNotFoundException(id);
 		}
 
-		return pValueOptional.get();
+		PValue pValue =  pValueOptional.get();
+		
+		FindPValueByIdResponse response = new FindPValueByIdResponse();
+		response.setId(id);
+		response.setProductId(pValue.getProduct().getId());
+		response.setAttributeId(pValue.getAttribute().getId());
+		response.setType(pValue.getUnit().getUnitType());
+		response.setValue(pValue.getValue());
+		response.setUnitName(pValue.getUnit().getUnitName());
+		
+		return response;
 	}
 
 	@Override
-	public FindByProductIdAndAttributeIdResponse findByProductIdAndAttributeId(DeleteValueByProductIdAndAttributeIdDto dto) {
-		Optional<PValue> pValueOptional = _pValueRepository.findByProductIdAndAttributeId(dto.getProductId(), dto.getAttributeId());
+	public FindPValueByProductIdAndAttributeIdResponse findByProductIdAndAttributeId(DeleteValueByProductIdAndAttributeIdDto dto) {
+		UUID productId = dto.getProductId(), attributeId = dto.getAttributeId();
+		
+		Optional<PValue> pValueOptional = _pValueRepository.findByProductIdAndAttributeId(productId, attributeId);
 		if (pValueOptional.isEmpty()) {
-			throw new PValueNotFoundException(dto.getProductId(), dto.getAttributeId());
+			throw new PValueNotFoundException(attributeId, productId);
 		}
 		
-		PValue value = pValueOptional.get();
+		PValue pValue = pValueOptional.get();
 		
-		return null;
+		FindPValueByProductIdAndAttributeIdResponse response = new FindPValueByProductIdAndAttributeIdResponse();
+		response.setProductId(productId);
+		response.setAttributeId(attributeId);
+		response.setType(pValue.getUnit().getUnitType());
+		response.setValue(pValue.getValue());
+		response.setUnitName(pValue.getUnit().getUnitName());
+		
+		return response;
 	}
 
 	@Override
-	public List<PValue> findAllByAttributeIdList(List<UUID> attributeIdList) {
-		List<PValue> values = _pValueRepository.findAllByAttributeIdIn(attributeIdList);
+	public List<FindPValuesByAttributeIdList> findAllByAttributeIdList(List<UUID> attributeIdList) {
+		List<PValue> pValues = _pValueRepository.findAllByAttributeIdIn(attributeIdList);
 		
-		return values;
+		List<FindPValuesByAttributeIdList> response = pValues.stream().map(pValue -> {
+			FindPValuesByAttributeIdList findPValuesByAttributeIdList = new FindPValuesByAttributeIdList();
+			findPValuesByAttributeIdList.setId(pValue.getId());
+			findPValuesByAttributeIdList.setProductId(pValue.getProduct().getId());
+			findPValuesByAttributeIdList.setValue(pValue.getValue());
+			findPValuesByAttributeIdList.setUnitName(pValue.getUnit().getUnitName());
+			findPValuesByAttributeIdList.setType(pValue.getUnit().getUnitType());
+			
+			return findPValuesByAttributeIdList;
+		}).toList();
+		
+		return response;
 	}
 
 	@Override
-	public List<PValue> findAllByProductIdList(List<UUID> productIdList) {
-		List<PValue> values = _pValueRepository.findAllByProductIdIn(productIdList);
+	public List<FindPValuesByProductIdList> findAllByProductIdList(List<UUID> productIdList) {
+		List<PValue> pValues = _pValueRepository.findAllByProductIdIn(productIdList);
+		
+		List<FindPValuesByProductIdList> response = pValues.stream().map(pValue -> {
+			FindPValuesByProductIdList findPValuesByProductIdList = new FindPValuesByProductIdList();
+			findPValuesByProductIdList.setId(pValue.getId());
+			findPValuesByProductIdList.setAttributeId(pValue.getAttribute().getId());
+			findPValuesByProductIdList.setValue(pValue.getValue());
+			findPValuesByProductIdList.setUnitName(pValue.getUnit().getUnitName());
+			findPValuesByProductIdList.setType(pValue.getUnit().getUnitType());
+			
+			return findPValuesByProductIdList;
+		}).toList();
 	
-		return values;
+		return response;
 	}
 
 	@Override
-	public List<Product> findAllProductByCategoryIdAndAttributeIdAndValue(FindAllProductByCategoryIdAndAttributeIdValueUnitTuplesDto dto) {
+	public List<FindAllProductByCategoryIdAndAttributeIdAndValueResponse> findAllProductByCategoryIdAndAttributeIdAndValue(FindAllProductByCategoryIdAndAttributeIdValueUnitTuplesDto dto) {
 		StringBuilder sqlStringBuilder = new StringBuilder("select p from Product p\r\n"
 				+ "join Category c on c.id = p.category.id\r\n"
 				+ "join PValue v on v.product.id = p.id\r\n"
@@ -106,7 +150,17 @@ public class PValueService implements IPValueService {
 	    }
 	    
 	    
-	   return  query.getResultList();
+	   List<Product> products = query.getResultList();
+	   
+	   List<FindAllProductByCategoryIdAndAttributeIdAndValueResponse> response = products.stream().map(product -> {
+		   FindAllProductByCategoryIdAndAttributeIdAndValueResponse findAllProductByCategoryIdAndAttributeIdAndValueResponse = new FindAllProductByCategoryIdAndAttributeIdAndValueResponse();
+		   findAllProductByCategoryIdAndAttributeIdAndValueResponse.setId(product.getId());
+		   findAllProductByCategoryIdAndAttributeIdAndValueResponse.setName(product.getName());
+			
+			return findAllProductByCategoryIdAndAttributeIdAndValueResponse;
+		}).toList();
+	   
+	   return response;
 	}
 
 	@Override
@@ -309,6 +363,7 @@ public class PValueService implements IPValueService {
 
 			pValue.setProduct(product);
 			pValue.setAttribute(attribute);
+			pValue.setValue(value);
 
 			product.getValues().add(pValue);
 		}

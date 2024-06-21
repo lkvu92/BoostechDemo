@@ -4,23 +4,26 @@ import java.util.List;
 import java.util.UUID;
 
 import com.boostech.demo.dto.*;
-import com.boostech.demo.dto.resDto.FindByProductIdAndAttributeIdResponse;
-import com.boostech.demo.entity.PValue;
+import com.boostech.demo.dto.resDto.FindAllProductByCategoryIdAndAttributeIdAndValueResponse;
+import com.boostech.demo.dto.resDto.FindPValueByIdResponse;
+import com.boostech.demo.dto.resDto.FindPValueByProductIdAndAttributeIdResponse;
+import com.boostech.demo.dto.resDto.FindPValuesByAttributeIdList;
+import com.boostech.demo.dto.resDto.FindPValuesByProductIdList;
 import com.boostech.demo.entity.Product;
 
 public interface IPValueService {
-	PValue findById(UUID id);
-	FindByProductIdAndAttributeIdResponse findByProductIdAndAttributeId(DeleteValueByProductIdAndAttributeIdDto dto);
+	FindPValueByIdResponse findById(UUID id);
+	FindPValueByProductIdAndAttributeIdResponse findByProductIdAndAttributeId(DeleteValueByProductIdAndAttributeIdDto dto);
 	
 //	PValue findByAttributeId(UUID attributeId);
 //	
 //	PValue findByProductId(UUID productId);
 	
-	List<PValue> findAllByAttributeIdList(List<UUID> attributeIdList);
+	List<FindPValuesByAttributeIdList> findAllByAttributeIdList(List<UUID> attributeIdList);
 	
-	List<PValue> findAllByProductIdList(List<UUID> productIdList);
+	List<FindPValuesByProductIdList> findAllByProductIdList(List<UUID> productIdList);
 	
-	List<Product> findAllProductByCategoryIdAndAttributeIdAndValue(FindAllProductByCategoryIdAndAttributeIdValueUnitTuplesDto dto);
+	List<FindAllProductByCategoryIdAndAttributeIdAndValueResponse> findAllProductByCategoryIdAndAttributeIdAndValue(FindAllProductByCategoryIdAndAttributeIdValueUnitTuplesDto dto);
 
 	void createValueById(CreateValueByIdDto dto);
 	

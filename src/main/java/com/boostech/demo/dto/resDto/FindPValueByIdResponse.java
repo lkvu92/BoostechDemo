@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class FindByProductIdAndAttributeIdResponse {
+public class FindPValueByIdResponse {
+	private UUID id;
 	private UUID productId;
 	private UUID attributeId;
 	private String value;
