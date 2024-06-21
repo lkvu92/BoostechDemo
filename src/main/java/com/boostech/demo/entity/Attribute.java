@@ -27,11 +27,9 @@ public class Attribute extends BaseEntity {
     @ManyToMany(mappedBy = "attributes")
     private List<Category> categories = new ArrayList<>();
 
-    @JsonBackReference
     @ManyToMany(mappedBy = "attributes")
     private List<Unit> units = new ArrayList<>();
 
-    @JsonBackReference
     @OneToMany(mappedBy = "attribute")
     List<PValue> values = new ArrayList<>();
 }
