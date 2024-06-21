@@ -158,6 +158,11 @@ public class ProductService {
         if (product == null) {
             return null;
         }
+        GetOneProductDto dto = customResponse(product);
+        return dto;
+    }
+
+    private GetOneProductDto customResponse(Product product) {
         GetOneProductDto dto = new GetOneProductDto();
         dto.setId(product.getId());
         dto.setName(product.getName());
@@ -166,7 +171,7 @@ public class ProductService {
         categoryDto.setName(product.getCategory().getName());
         dto.setCategory(categoryDto);
 
-        List<PValue> listPValue = pValueRepository.findAllByProductIdIn(List.of(productId));
+        List<PValue> listPValue = pValueRepository.findAllByProductIdIn(List.of(product.getId()));
         for (PValue pValue : listPValue) {
             GetOneProductDto.AttributeDto attributeDto = new GetOneProductDto.AttributeDto();
             attributeDto.setId(pValue.getAttribute().getId());
@@ -182,7 +187,7 @@ public class ProductService {
      * Create product full version
      */
     @Transactional
-    public Product createProductFullVersion(ProductCreateDto productCreateDto) {
+    public GetOneProductDto createProductFullVersion(ProductCreateDto productCreateDto) {
        //input Product, List<Attribute>
         Optional<Category> categoryOptional = categoryRepository.findById(productCreateDto.getCate_id());
         if (categoryOptional.isEmpty()) {
@@ -216,7 +221,8 @@ public class ProductService {
 
         pValueService.createValueByProductIdAndAttributeIdValueUnitTuples(product, attributeIdValueUnitTuples);
 
-        return product;
+        GetOneProductDto productCustom = customResponse(product);
+        return productCustom;
     }
 
     private Map<UUID, Attribute> CheckListAttribute(List<Attribute> listAttributeOfCate, List<AttributeValueDto> listAttributeOfProduct){
