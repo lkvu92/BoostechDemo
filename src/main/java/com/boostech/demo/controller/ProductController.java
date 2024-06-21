@@ -82,11 +82,11 @@ public class ProductController {
     }
 
     @PostMapping()
-    public ResponseEntity<CustomResponse<Product>> saveProduct(@RequestBody ProductCreateDto productCreateDto)  {
-        Product product = productService.createProductFullVersion(productCreateDto);
+    public ResponseEntity<CustomResponse<GetOneProductDto>> saveProduct(@RequestBody ProductCreateDto productCreateDto)  {
+        GetOneProductDto product = productService.createProductFullVersion(productCreateDto);
 //        if(product == null) {
 //            return new ResponseEntity<>(new CustomResponse<>("Product fail!", 400, null), HttpStatus.BAD_REQUEST);
 //        }
-        return new ResponseEntity<CustomResponse<Product>>(new CustomResponse<>("Product created successfully", 201, product), HttpStatus.CREATED);
+        return new ResponseEntity<CustomResponse<GetOneProductDto>>(new CustomResponse<>("Product created successfully", 201, product), HttpStatus.CREATED);
     }
 }
