@@ -4,9 +4,12 @@ import com.boostech.demo.dto.CustomProductResponse;
 import com.boostech.demo.dto.FindAllProductByCategoryIdAndAttributeIdValuePairsDto;
 import com.boostech.demo.dto.GetOneProductDto;
 import com.boostech.demo.dto.ProductCreateDto;
+import com.boostech.demo.entity.Attribute;
 import com.boostech.demo.entity.Category;
+import com.boostech.demo.entity.PValue;
 import com.boostech.demo.entity.Product;
 import com.boostech.demo.repository.CategoryRepository;
+import com.boostech.demo.repository.PValueRepository;
 import com.boostech.demo.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,14 +19,15 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class ProductService {
     private final ProductRepository productRepository;
     @Autowired
     private CategoryRepository categoryRepository;
+    @Autowired
+    private PValueRepository pValueRepository;
 
     public ProductService(ProductRepository productRepository) {
         this.productRepository = productRepository;
@@ -147,8 +151,60 @@ public class ProductService {
         return "/api/products?page=" + pageable.getPageNumber() + "&size=" + pageable.getPageSize();
     }
 
-    private List<GetOneProductDto> searchProductsByCategoryAndAttributes(FindAllProductByCategoryIdAndAttributeIdValuePairsDto dto) {
+    /**
+     * Get one product by id with custom response
+     * @param productId
+     * @return
+     */
+    public GetOneProductDto getOneProductDtos(UUID productId) {
+        Product product = productRepository.findById(productId).orElse(null);
+        if (product == null) {
+            return null;
+        }
+        GetOneProductDto dto = new GetOneProductDto();
+        dto.setId(product.getId());
+        dto.setName(product.getName());
+        GetOneProductDto.CategoryDto categoryDto = new GetOneProductDto.CategoryDto();
+        categoryDto.setId(product.getCategory().getId());
+        categoryDto.setName(product.getCategory().getName());
+        dto.setCategory(categoryDto);
+
+        List<PValue> listPValue = pValueRepository.findAllByProductIdIn(List.of(productId));
+        for (PValue pValue : listPValue) {
+            GetOneProductDto.AttributeDto attributeDto = new GetOneProductDto.AttributeDto();
+            attributeDto.setId(pValue.getAttribute().getId());
+            attributeDto.setName(pValue.getAttribute().getAttributeName());
+            attributeDto.setValue(pValue.getValue());
+            attributeDto.setUnit(pValue.getUnit().getUnitName());
+
+            dto.getAttributes().add(attributeDto);
+        }
+        return dto;
+    }
+    /**
+     * Create product full version
+     */
+    public Product createProductFullVersion(ProductCreateDto productCreateDto, List<Attribute> attributess) {
+       //input Product, List<Attribute>
+        List<Attribute> getAttributes = categoryRepository.findById(productCreateDto.getCate_id()).get().getAttributes();
+        //Check list attr isqual list attr in cate , if not return null
+        if(!compareListAttribute(getAttributes, attributess)){
+            return null;
+        }
+        //create transaction
+        //create list attribute
+        //Create product
 
         return null;
+    }
+
+    private boolean compareListAttribute(List<Attribute> listAttributeOfCate, List<Attribute> listAttributeOfProduct){
+        Set<Attribute> listAttributeOfCateSet = new HashSet<>(listAttributeOfCate);
+        Set<Attribute> listAttributeOfProductSet = new HashSet<>(listAttributeOfProduct);
+
+        Set<Attribute> commonElements = new HashSet<>(listAttributeOfCateSet);
+        commonElements.retainAll(listAttributeOfProductSet);
+
+        return commonElements.size() == listAttributeOfCateSet.size();
     }
 }

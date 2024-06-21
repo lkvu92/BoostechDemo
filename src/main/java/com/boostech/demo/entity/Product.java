@@ -5,7 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "product")
@@ -19,4 +20,7 @@ public class Product extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "cate_id")
     private Category category;
+
+    @OneToMany(mappedBy = "product")
+    List<PValue> values = new ArrayList<>();
 }

@@ -11,17 +11,17 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PValue extends BaseEntity {
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product product;
+	@ManyToOne
+	@JoinColumn(name = "product_id")
+	private Product product;
 
-    @ManyToOne
-    @JoinColumn(name = "attribute_id")
-    private Attribute attribute;
-
+	@ManyToOne
+	@JoinColumn(name = "attribute_id")
+	private Attribute attribute;
+	
     @Column(name = "value")
-    private String value;
+	private String value;
 
-    @OneToOne()
-    private Unit unit;
+	@OneToOne()
+	private Unit unit;
 }

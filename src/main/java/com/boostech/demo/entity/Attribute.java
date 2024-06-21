@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @Table(name = "attribute")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-@JsonIdentityReference(alwaysAsId = true)
+
 public class Attribute extends BaseEntity {
     @Column(name = "name", unique = true, nullable = false)
     private String attributeName;

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
-public class CategoryDTO {
+public class CategoryRequestDTO {
     private String name;
     private List<UUID> attributeIds;
 }

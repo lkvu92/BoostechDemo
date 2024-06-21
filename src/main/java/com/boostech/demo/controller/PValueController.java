@@ -7,24 +7,30 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.boostech.demo.dto.CreateValueByIdDto;
+import com.boostech.demo.dto.DeleteValueByIdDto;
 import com.boostech.demo.dto.FindAllProductByCategoryIdAndAttributeIdValuePairsDto;
+import com.boostech.demo.dto.UpdateValueByIdDto;
 import com.boostech.demo.entity.PValue;
 import com.boostech.demo.entity.Product;
+import com.boostech.demo.exception.AttributeNotFoundException;
 import com.boostech.demo.exception.ErrorInfo;
 import com.boostech.demo.exception.PValueConflictException;
 import com.boostech.demo.exception.PValueNotFoundException;
+import com.boostech.demo.exception.ProductNotFoundException;
 import com.boostech.demo.service.IPValueService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,12 +44,16 @@ public class PValueController {
 	private final IPValueService _pValueService;
 	
 	@GetMapping
-	public ResponseEntity<PValue> findById (
-		@RequestParam(name="attribute_id", required = false) UUID attributeId, 
-		@RequestParam(name="product_id", required = false) UUID productId
-	) {
-		PValue value = _pValueService.findById(attributeId, productId);
+	public ResponseEntity<PValue> findByProductIdAndAttributeId(@RequestBody DeleteValueByIdDto request) {
+		PValue value = _pValueService.findByProductIdAndAttributeId(request);
 		
+		return ResponseEntity.ok(value);
+	}
+
+	@GetMapping("{id}")
+	public ResponseEntity<PValue> findById(@PathVariable UUID id) {
+		PValue value = _pValueService.findById(id);
+
 		return ResponseEntity.ok(value);
 	}
 	
@@ -81,8 +91,30 @@ public class PValueController {
 		
 	}
 	
+	@PatchMapping("{id}")
+	public ResponseEntity<?> updateValueById(
+			@PathVariable UUID id,
+			@RequestBody 
+			UpdateValueByIdDto request) {
+		
+		request.setId(id);
+		_pValueService.updateValueById(request);
+		
+		return ResponseEntity.ok().build();
+		
+	}
+	
+	@DeleteMapping("{id}")
+	public ResponseEntity<?> deleteValueById(
+			@PathVariable UUID id) {
+		boolean delete = _pValueService.deleteValueById(id);
+		
+		return ResponseEntity.ok().build();
+		
+	}
+	
 	@ResponseStatus(HttpStatus.NOT_FOUND)
-	@ExceptionHandler(PValueNotFoundException.class)
+	@ExceptionHandler({PValueNotFoundException.class, ProductNotFoundException.class, AttributeNotFoundException.class})
 	@ResponseBody ErrorInfo handlePValueNotFound(HttpServletRequest req, Exception ex) {
 	    return new ErrorInfo(HttpStatus.NOT_FOUND.value(), ex.getLocalizedMessage());
 	}
