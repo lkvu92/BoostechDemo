@@ -8,6 +8,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface IAttributeRepository extends JpaRepository<Attribute, UUID> {
-    //
-    //List<Attribute> findAllWithUnit();
+    List<Attribute> findAllByCategoriesId(UUID categoryId);
 }
