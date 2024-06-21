@@ -89,4 +89,9 @@ public class ProductController {
 //        }
         return new ResponseEntity<CustomResponse<GetOneProductDto>>(new CustomResponse<>("Product created successfully", 201, product), HttpStatus.CREATED);
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<CustomResponse<String>> handleIllegalArgumentException(IllegalArgumentException e) {
+        return new ResponseEntity<>(new CustomResponse<>(e.getMessage(), 400, null), HttpStatus.BAD_REQUEST);
+    }
 }

@@ -306,6 +306,7 @@ public class PValueService implements IPValueService {
 
 			pValue.setProduct(product);
 			pValue.setAttribute(attribute);
+			pValue.setValue(value);
 
 			product.getValues().add(pValue);
 		}

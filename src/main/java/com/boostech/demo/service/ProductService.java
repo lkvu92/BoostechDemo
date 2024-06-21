@@ -188,6 +188,10 @@ public class ProductService {
      */
     @Transactional
     public GetOneProductDto createProductFullVersion(ProductCreateDto productCreateDto) {
+        //validate product name
+        if (!productCreateDto.getName().isEmpty() && productRepository.existsByName(productCreateDto.getName())) {
+            throw new IllegalArgumentException("Product name already exists");
+        }
        //input Product, List<Attribute>
         Optional<Category> categoryOptional = categoryRepository.findById(productCreateDto.getCate_id());
         if (categoryOptional.isEmpty()) {
@@ -199,7 +203,7 @@ public class ProductService {
 
         Map<UUID, Attribute> listAttributeOfCateMap = CheckListAttribute(attributes, productCreateDto.getAttributeValues());
         if(listAttributeOfCateMap == null){
-            throw new IllegalArgumentException("Size of listAttributeOfCate cannot be greater than size of listAttributeOfProduct.");
+            throw new IllegalArgumentException("Product's attributes are not valid");
         }
         //Create product
         Optional<Category> cate = categoryRepository.findById(productCreateDto.getCate_id());
@@ -223,6 +227,11 @@ public class ProductService {
 
         GetOneProductDto productCustom = customResponse(product);
         return productCustom;
+    }
+
+    @Transactional
+    public GetOneProductDto updateProductFullVersion(ProductCreateDto productCreateDto) {
+        return null;
     }
 
     private Map<UUID, Attribute> CheckListAttribute(List<Attribute> listAttributeOfCate, List<AttributeValueDto> listAttributeOfProduct){

@@ -24,6 +24,6 @@ public class PValue extends BaseEntity {
     @Column(name = "value")
 	private String value;
 
-	@OneToOne()
+	@ManyToOne()
 	private Unit unit;
 }
