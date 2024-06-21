@@ -2,40 +2,26 @@ package com.boostech.demo.entity;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 @Entity
 @Data
 @Table(name = "p_value")
-public class PValue {
-	@EmbeddedId
-    private PValuePrimaryKey valueId;
-	
+@EqualsAndHashCode(callSuper=true)
+@AllArgsConstructor
+@NoArgsConstructor
+public class PValue extends BaseEntity {
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
+
+    @ManyToOne
+    @JoinColumn(name = "attribute_id")
+    private Attribute attribute;
+
     @Column(name = "value")
-	private String value;
-	
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private String value;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
-    @PrePersist
-    protected void PreUpdate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreRemove
-    protected void onRemove() {
-        deletedAt = LocalDateTime.now();
-    }
+    @OneToOne()
+    private Unit unit;
 }

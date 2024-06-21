@@ -1,5 +1,6 @@
 package com.boostech.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -19,13 +20,16 @@ import java.util.List;
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @JsonIdentityReference(alwaysAsId = true)
 public class Attribute extends BaseEntity {
-    @Column(name = "name", unique = false, nullable = false)
+    @Column(name = "name", unique = true, nullable = false)
     private String attributeName;
 
-    @OneToOne()
-    @JoinColumn(name = "unit_id", referencedColumnName = "id", nullable = true)
-    private Unit unit;
-
+    @JsonBackReference
     @ManyToMany(mappedBy = "attributes")
     private List<Category> categories = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "attributes")
+    private List<Unit> units = new ArrayList<>();
+
+    @OneToMany(mappedBy = "attribute")
+    List<PValue> values = new ArrayList<>();
 }
