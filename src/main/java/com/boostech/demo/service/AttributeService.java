@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,6 +42,12 @@ public class AttributeService implements IAttributeService {
         try {
             Attribute attribute = new Attribute();
             attribute.setAttributeName(attributeDto.getAttributeName());
+
+            Unit unit = unitRepository.findById(attributeDto.getUnitId()).orElseThrow();
+            List<Unit> units = new ArrayList<>();
+            units.add(unit);
+            attribute.setUnits(units);
+
             return repository.save(attribute);
         }catch (EntityNotFoundException e){
             throw new EntityNotFoundException(e.getMessage());
@@ -55,7 +62,12 @@ public class AttributeService implements IAttributeService {
             }
 
             existingAttribute.setAttributeName(attributeDto.getAttributeName());
-            //existingAttribute.setActive(true);
+            Unit unit = unitRepository.findById(attributeDto.getUnitId()).orElseThrow();
+
+            List<Unit> unitList = new ArrayList<>();
+            unitList.add(unit);
+
+            existingAttribute.getUnits().add(unit); // Thêm Unit mới
             return repository.save(existingAttribute);
 
         }catch (EntityNotFoundException e){
@@ -70,6 +82,6 @@ public class AttributeService implements IAttributeService {
         }
 
         existingAttribute.setDeletedAt(LocalDateTime.now());
-        repository.save(existingAttribute);
+        repository.delete(existingAttribute);
     }
 }

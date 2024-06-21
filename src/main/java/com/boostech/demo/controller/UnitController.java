@@ -3,9 +3,11 @@ package com.boostech.demo.controller;
 import com.boostech.demo.dto.UnitDto;
 import com.boostech.demo.entity.Unit;
 import com.boostech.demo.service.IUnitService;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -33,45 +35,57 @@ public class UnitController {
             return ResponseEntity.ok().body(unit);
         }
         catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Unit not found.");
         }
     }
 
     @DeleteMapping("delete/{id}")
     public ResponseEntity<?> removeUnit(@PathVariable UUID id) {
-        ResponseEntity<?> unit = getUnitDetail(id);
-        if(unit == null){
-            return ResponseEntity.notFound().build();
-        }
-        unitService.delete(id);
-        return ResponseEntity.ok().body("Removed unit successfully.");
+       try{
+           ResponseEntity<?> unit = getUnitDetail(id);
+           if(unit == null){
+               return ResponseEntity.notFound().build();
+           }
+           unitService.delete(id);
+           return ResponseEntity.ok().body("Removed unit successfully.");
+       }catch (EntityNotFoundException e) {
+           return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Unit not found.");
+       }
     }
 
     @PostMapping()
     public ResponseEntity<?> createUnit(@Valid  @RequestBody UnitDto unitDto, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            List<String> errorMessages = bindingResult.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
-            return ResponseEntity.badRequest().body(errorMessages);
+        try {
+            if (bindingResult.hasErrors()) {
+                List<String> errorMessages = bindingResult.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
+                return ResponseEntity.badRequest().body(errorMessages);
+            }
+
+            Unit unit = unitService.create(unitDto);
+
+            return ResponseEntity.ok(unit);
+        }catch (EntityExistsException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Unit type already exists.");
         }
-
-        Unit unit = unitService.create(unitDto);
-
-        return ResponseEntity.ok(unit);
     }
 
     @PutMapping("edit/{id}")
     public ResponseEntity<?> updateUnit(@PathVariable UUID id, @Valid @RequestBody UnitDto unitDto, BindingResult bindingResult) {
         ResponseEntity<?> existingUnit = getUnitDetail(id);
-        if (existingUnit == null) {
-            return ResponseEntity.notFound().build();
-        }
+        try{
+            if (existingUnit == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Unit not found.");
+            }
 
-        if (bindingResult.hasErrors()) {
-            List<String> errorMessages = bindingResult.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
-            return ResponseEntity.badRequest().body(errorMessages);
-        }
+            if (bindingResult.hasErrors()) {
+                List<String> errorMessages = bindingResult.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
+                return ResponseEntity.badRequest().body(errorMessages);
+            }
 
-        Unit unit = unitService.update(id, unitDto);
-        return ResponseEntity.ok(unit);
+            Unit unit = unitService.update(id, unitDto);
+            return ResponseEntity.ok(unit);
+        }catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Unit not found.");
+        }
     }
 }

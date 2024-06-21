@@ -20,12 +20,6 @@ public class AttributeController {
 
     private final AttributeService attributeService;
 
-//    @GetMapping("attributeWithUnit")
-//    public ResponseEntity<?> getAttributeWithUnit() {
-//        List<Attribute> attributeList = attributeService.findAllWithUnit();
-//        return ResponseEntity.ok(attributeList);
-//    }
-
     @GetMapping()
     public ResponseEntity<?> getAllAttribute() {
         List<Attribute> attributeList = attributeService.getAll();
@@ -60,7 +54,7 @@ public class AttributeController {
         }
 
         attributeService.create(attributeDto);
-        return ResponseEntity.ok().body("Attribute Added Successfully.");
+        return ResponseEntity.ok(attributeDto);
     }
 
     @PutMapping("edit/{id}")

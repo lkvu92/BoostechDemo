@@ -66,6 +66,6 @@ public class UnitService implements IUnitService {
             throw new EntityNotFoundException("Unit not found");
         }
         existingUnit.setDeletedAt(LocalDateTime.now());
-        repository.save(existingUnit);
+        repository.delete(existingUnit);
     }
 }

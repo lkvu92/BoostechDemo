@@ -1,5 +1,6 @@
 package com.boostech.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,6 +19,7 @@ public class Unit extends BaseEntity {
     @Column(name = "unit_type", nullable = false)
     private String unitType;
 
+    @JsonBackReference
     @ManyToMany
     @JoinTable(
             name = "attribute_unit",

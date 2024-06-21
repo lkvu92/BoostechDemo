@@ -20,7 +20,7 @@ import java.util.List;
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 
 public class Attribute extends BaseEntity {
-    @Column(name = "name", unique = true, nullable = false)
+    @Column(name = "name", unique = false, nullable = false)
     private String attributeName;
 
     @JsonBackReference
