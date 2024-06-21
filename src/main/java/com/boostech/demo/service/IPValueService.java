@@ -4,12 +4,13 @@ import java.util.List;
 import java.util.UUID;
 
 import com.boostech.demo.dto.*;
+import com.boostech.demo.dto.resDto.FindByProductIdAndAttributeIdResponse;
 import com.boostech.demo.entity.PValue;
 import com.boostech.demo.entity.Product;
 
 public interface IPValueService {
 	PValue findById(UUID id);
-	PValue findByProductIdAndAttributeId(DeleteValueByProductIdAndAttributeIdDto dto);
+	FindByProductIdAndAttributeIdResponse findByProductIdAndAttributeId(DeleteValueByProductIdAndAttributeIdDto dto);
 	
 //	PValue findByAttributeId(UUID attributeId);
 //	

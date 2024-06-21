@@ -25,6 +25,7 @@ import com.boostech.demo.dto.CreateValueByIdDto;
 import com.boostech.demo.dto.DeleteValueByProductIdAndAttributeIdDto;
 import com.boostech.demo.dto.FindAllProductByCategoryIdAndAttributeIdValueUnitTuplesDto;
 import com.boostech.demo.dto.UpdateValueByIdDto;
+import com.boostech.demo.dto.resDto.FindByProductIdAndAttributeIdResponse;
 import com.boostech.demo.entity.PValue;
 import com.boostech.demo.entity.Product;
 import com.boostech.demo.exception.AttributeNotFoundException;
@@ -47,12 +48,12 @@ public class PValueController {
 	private final IPValueService _pValueService;
 	
 	@GetMapping
-	public ResponseEntity<PValue> findByProductIdAndAttributeId( 
+	public ResponseEntity<FindByProductIdAndAttributeIdResponse> findByProductIdAndAttributeId( 
 			@RequestBody DeleteValueByProductIdAndAttributeIdDto request,
 			@RequestParam(name = "includeDeleted") boolean includeDeleted) {
-		PValue value = _pValueService.findByProductIdAndAttributeId(request);
+		FindByProductIdAndAttributeIdResponse res = _pValueService.findByProductIdAndAttributeId(request);
 		
-		return ResponseEntity.ok(value);
+		return ResponseEntity.ok(res);
 	}
 
 	@GetMapping("{id}")

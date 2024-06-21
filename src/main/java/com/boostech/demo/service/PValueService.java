@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.boostech.demo.dto.*;
+import com.boostech.demo.dto.resDto.FindByProductIdAndAttributeIdResponse;
 import com.boostech.demo.entity.Unit;
 import com.boostech.demo.repository.IUnitRepository;
 import lombok.Value;
@@ -52,13 +53,15 @@ public class PValueService implements IPValueService {
 	}
 
 	@Override
-	public PValue findByProductIdAndAttributeId(DeleteValueByProductIdAndAttributeIdDto dto) {
+	public FindByProductIdAndAttributeIdResponse findByProductIdAndAttributeId(DeleteValueByProductIdAndAttributeIdDto dto) {
 		Optional<PValue> pValueOptional = _pValueRepository.findByProductIdAndAttributeId(dto.getProductId(), dto.getAttributeId());
 		if (pValueOptional.isEmpty()) {
 			throw new PValueNotFoundException(dto.getProductId(), dto.getAttributeId());
 		}
-
-		return pValueOptional.get();
+		
+		PValue value = pValueOptional.get();
+		
+		return null;
 	}
 
 	@Override
