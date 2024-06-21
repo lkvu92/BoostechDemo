@@ -65,14 +65,14 @@ public class PValueService implements IPValueService {
 	@Override
 	public List<PValue> findAllByAttributeIdList(List<UUID> attributeIdList) {
 		List<PValue> values = _pValueRepository.findAllByAttributeIdIn(attributeIdList);
-		
+
 		return values;
 	}
 
 	@Override
 	public List<PValue> findAllByProductIdList(List<UUID> productIdList) {
 		List<PValue> values = _pValueRepository.findAllByProductIdIn(productIdList);
-	
+
 		return values;
 	}
 
@@ -83,39 +83,39 @@ public class PValueService implements IPValueService {
 				+ "join PValue v on  v.product.id = p.id\r\n"
 				+ "join Attribute a on a.id = v.attribute.id\r\n"
 				+ "where p.category.id = :categoryId\r\n");
-		
+
 		List<AttributeIdValuePair> pairs = dto.getAttributeIdValuePairs();
-		
-	    for (int i = 0; i < pairs.size(); i++) {
-		    sqlStringBuilder.append(String.format("and v.attribute.id = :attributeId%s and v.value = :value%s\r\n", i, i));
-	    }
-	    
-	    TypedQuery<Product> query = _entityManager.createQuery(sqlStringBuilder.toString(), Product.class);
-	    query.setParameter("categoryId", dto.getCategoryId());
-	    
-	    for (int i = 0; i < pairs.size(); i++) {
-	    	query.setParameter("attributeId" + i, pairs.get(i).id);
-	    	query.setParameter("value" + i, pairs.get(i).value);
-	    }
-	    
-	    
-	   return  query.getResultList();
+
+		for (int i = 0; i < pairs.size(); i++) {
+			sqlStringBuilder.append(String.format("and v.attribute.id = :attributeId%s and v.value = :value%s\r\n", i, i));
+		}
+
+		TypedQuery<Product> query = _entityManager.createQuery(sqlStringBuilder.toString(), Product.class);
+		query.setParameter("categoryId", dto.getCategoryId());
+
+		for (int i = 0; i < pairs.size(); i++) {
+			query.setParameter("attributeId" + i, pairs.get(i).id);
+			query.setParameter("value" + i, pairs.get(i).value);
+		}
+
+
+		return  query.getResultList();
 	}
 
 	@Override
 	@Transactional
 	public void createValueById(CreateValueByIdDto dto) {
 		UUID productId = dto.getProductId(), attributeId = dto.getAttributeId(), unitId = dto.getUnitId();
-		
+
 		if (_pValueRepository.existsByProductIdAndAttributeId(productId, attributeId)) {
 			throw new PValueConflictException(String.format("value existed on 'product id' = %s and 'attribute id' = %s", productId, attributeId));
 		}
-		
+
 		Optional<Product> productOptional = _productRepository.findById(productId);
 		if (productOptional.isEmpty()) {
 			throw new ProductNotFoundException(productId);
 		}
-		
+
 		Optional<Attribute> attributeOptional = _attributeRepository.findById(attributeId);
 		if (attributeOptional.isEmpty()) {
 			throw new AttributeNotFoundException(attributeId);
@@ -129,56 +129,56 @@ public class PValueService implements IPValueService {
 		Product product = productOptional.get();
 		Attribute attribute = attributeOptional.get();
 		Unit unit = unitOptional.get();
-		
+
 		PValue value = new PValue(product, attribute, dto.getValue(), unit);
-		
+
 		_pValueRepository.save(value);
 	}
 
 	@Override
 	public void updateValueById(UpdateValueByIdDto dto) {
 		Optional<PValue> valueOptional = _pValueRepository.findById(dto.getId());
-		
+
 		if (valueOptional.isEmpty()) {
 			throw new PValueNotFoundException(dto.getId());
 		}
-		
+
 		PValue value = valueOptional.get();
-		
+
 		if (dto.getProductId() != null) {
 			Optional<Product> productOptional = _productRepository.findById(dto.getProductId());
 			if (productOptional.isEmpty()) {
 				throw new ProductNotFoundException(dto.getProductId());
 			}
-			
+
 			value.setProduct(productOptional.get());
 		}
-		
+
 		if (dto.getAttributeId() != null) {
 			Optional<Attribute> attributeOptional = _attributeRepository.findById(dto.getAttributeId());
 			if (attributeOptional.isEmpty()) {
 				throw new AttributeNotFoundException(dto.getAttributeId());
 			}
-			
+
 			value.setAttribute(attributeOptional.get());
 		}
-		
+
 		value.setValue(dto.getValue());
-		
+
 		_pValueRepository.save(value);
 	}
 
 	@Override
 	public boolean deleteValueById(UUID id) {
 		Optional<PValue> valueOptional = _pValueRepository.findById(id);
-		
+
 		if (valueOptional.isEmpty()) {
 			throw new PValueNotFoundException(id);
 		}
-		
+
 		PValue value = valueOptional.get();
 		boolean delete = false;
-		
+
 		if (value.getDeletedAt() != null) {
 			value.setDeletedAt(LocalDateTime.now());
 			delete = true;
@@ -186,10 +186,10 @@ public class PValueService implements IPValueService {
 		else {
 			value.setDeletedAt(null);
 		}
-		
+
 		_pValueRepository.save(value);
-		
+
 		return delete;
 	}
-	
+
 }

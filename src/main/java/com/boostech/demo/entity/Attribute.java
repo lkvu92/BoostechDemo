@@ -20,16 +20,18 @@ import java.util.List;
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 
 public class Attribute extends BaseEntity {
-    @Column(name = "name", unique = true, nullable = false)
+    @Column(name = "name", unique = false, nullable = false)
     private String attributeName;
 
     @JsonBackReference
     @ManyToMany(mappedBy = "attributes")
     private List<Category> categories = new ArrayList<>();
 
+    @JsonBackReference
     @ManyToMany(mappedBy = "attributes")
     private List<Unit> units = new ArrayList<>();
 
+    @JsonBackReference
     @OneToMany(mappedBy = "attribute")
     List<PValue> values = new ArrayList<>();
 }
