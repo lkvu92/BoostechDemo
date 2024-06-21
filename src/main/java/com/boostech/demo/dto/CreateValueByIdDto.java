@@ -13,4 +13,5 @@ public class CreateValueByIdDto {
 	private UUID productId;
 	private UUID attributeId;
 	private String value;
+	private UUID unitId;
 }

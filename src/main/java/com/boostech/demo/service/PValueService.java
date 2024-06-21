@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.boostech.demo.entity.Unit;
+import com.boostech.demo.repository.IUnitRepository;
 import org.springframework.stereotype.Service;
 
 import com.boostech.demo.dto.FindAllProductByCategoryIdAndAttributeIdValuePairsDto;
@@ -37,6 +39,7 @@ public class PValueService implements IPValueService {
 	private final IAttributeRepository _attributeRepository;
 	private final ProductRepository _productRepository;
 	private final EntityManager _entityManager;
+	private final IUnitRepository _unitRepository;
 
 	@Override
 	public PValue findById(UUID id) {
@@ -52,7 +55,6 @@ public class PValueService implements IPValueService {
 	@Override
 	public PValue findByProductIdAndAttributeId(DeleteValueByIdDto dto) {
 		Optional<PValue> pValueOptional = _pValueRepository.findByProductIdAndAttributeId(dto.getProductId(), dto.getAttributeId());
-
 		if (pValueOptional.isEmpty()) {
 			throw new PValueNotFoundException(dto.getProductId(), dto.getAttributeId());
 		}
@@ -103,7 +105,7 @@ public class PValueService implements IPValueService {
 	@Override
 	@Transactional
 	public void createValueById(CreateValueByIdDto dto) {
-		UUID productId = dto.getProductId(), attributeId = dto.getAttributeId();
+		UUID productId = dto.getProductId(), attributeId = dto.getAttributeId(), unitId = dto.getUnitId();
 		
 		if (_pValueRepository.existsByProductIdAndAttributeId(productId, attributeId)) {
 			throw new PValueConflictException(String.format("value existed on 'product id' = %s and 'attribute id' = %s", productId, attributeId));
@@ -118,12 +120,17 @@ public class PValueService implements IPValueService {
 		if (attributeOptional.isEmpty()) {
 			throw new AttributeNotFoundException(attributeId);
 		}
-		
+
+		Optional<Unit> unitOptional = _unitRepository.findById(unitId);
+		if (unitOptional.isEmpty()) {
+			throw new AttributeNotFoundException(unitId);
+		}
 
 		Product product = productOptional.get();
 		Attribute attribute = attributeOptional.get();
+		Unit unit = unitOptional.get();
 		
-		PValue value = new PValue(product, attribute, dto.getValue());
+		PValue value = new PValue(product, attribute, dto.getValue(), unit);
 		
 		_pValueRepository.save(value);
 	}

@@ -175,7 +175,7 @@ public class ProductService {
             attributeDto.setId(pValue.getAttribute().getId());
             attributeDto.setName(pValue.getAttribute().getAttributeName());
             attributeDto.setValue(pValue.getValue());
-            attributeDto.setUnit(pValue.getAttribute().getUnit().getUnitName());
+            attributeDto.setUnit(pValue.getUnit().getUnitName());
 
             dto.getAttributes().add(attributeDto);
         }

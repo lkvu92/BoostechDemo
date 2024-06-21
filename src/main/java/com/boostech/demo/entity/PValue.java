@@ -6,6 +6,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Data
 @Table(name = "p_value")
@@ -23,4 +26,7 @@ public class PValue extends BaseEntity {
 	
     @Column(name = "value")
 	private String value;
+
+	@OneToOne()
+	private Unit unit;
 }
