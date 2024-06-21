@@ -57,7 +57,8 @@ public class AttributeService implements IAttributeService {
             }
 
             existingAttribute.setAttributeName(attributeDto.getAttributeName());
-            //existingAttribute.setActive(true);
+            Unit unit = unitRepository.findById(attributeDto.getUnitId()).orElse(null);
+            existingAttribute.setUnit(unit);
             return repository.save(existingAttribute);
 
         }catch (EntityNotFoundException e){
@@ -72,6 +73,6 @@ public class AttributeService implements IAttributeService {
         }
 
         existingAttribute.setDeletedAt(LocalDateTime.now());
-        repository.save(existingAttribute);
+        repository.delete(existingAttribute);
     }
 }
