@@ -16,7 +16,10 @@ public interface PValueRepository extends JpaRepository<PValue, UUID> {
 	Optional<PValue> findByProductIdAndAttributeId(UUID productId, UUID attributeId);
 	Optional<PValue> findByProductIdAndAttributeIdAndDeletedAtIsNull(UUID productId, UUID attributeId);
 	List<PValue> findAllByAttributeIdIn(List<UUID> attributeIdList);
+	List<PValue> findAllByDeletedAtIsNullAndAttributeIdIn(List<UUID> attributeIdList);
 	List<PValue> findAllByProductIdIn(List<UUID> productIdList);
+	List<PValue> findAllByDeletedAtIsNullAndProductIdIn(List<UUID> productIdList);
+	Optional<PValue> findByIdAndDeletedAtIsNull(UUID id);
 	
 //	@Procedure(procedureName = "FILTER_PRODUCT")
 //	void filterProduct(Map<String, String> map);

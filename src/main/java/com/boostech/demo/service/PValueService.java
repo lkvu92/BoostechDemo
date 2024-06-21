@@ -45,9 +45,16 @@ public class PValueService implements IPValueService {
 	private final IUnitRepository _unitRepository;
 
 	@Override
-	public FindPValueByIdResponse findById(UUID id) {
-		Optional<PValue> pValueOptional = _pValueRepository.findById(id);
+	public FindPValueByIdResponse findById(UUID id, boolean includeDeleted) {
+		Optional<PValue> pValueOptional = Optional.empty();
 
+		if (includeDeleted) {
+			pValueOptional = _pValueRepository.findById(id);
+		}
+		else {
+			pValueOptional = _pValueRepository.findByIdAndDeletedAtIsNull(id);
+		}
+		
 		if (pValueOptional.isEmpty()) {
 			throw new PValueNotFoundException(id);
 		}
@@ -66,10 +73,20 @@ public class PValueService implements IPValueService {
 	}
 
 	@Override
-	public FindPValueByProductIdAndAttributeIdResponse findByProductIdAndAttributeId(DeleteValueByProductIdAndAttributeIdDto dto) {
+	public FindPValueByProductIdAndAttributeIdResponse findByProductIdAndAttributeId(
+			DeleteValueByProductIdAndAttributeIdDto dto, 
+			boolean includeDeleted
+	) {
 		UUID productId = dto.getProductId(), attributeId = dto.getAttributeId();
+		Optional<PValue> pValueOptional = Optional.empty();
 		
-		Optional<PValue> pValueOptional = _pValueRepository.findByProductIdAndAttributeId(productId, attributeId);
+		if (includeDeleted) {
+			pValueOptional = _pValueRepository.findByProductIdAndAttributeId(productId, attributeId);
+		}
+		else {
+			pValueOptional = _pValueRepository.findByProductIdAndAttributeIdAndDeletedAtIsNull(productId, attributeId);
+		}
+		
 		if (pValueOptional.isEmpty()) {
 			throw new PValueNotFoundException(attributeId, productId);
 		}
@@ -87,8 +104,18 @@ public class PValueService implements IPValueService {
 	}
 
 	@Override
-	public List<FindPValuesByAttributeIdList> findAllByAttributeIdList(List<UUID> attributeIdList) {
-		List<PValue> pValues = _pValueRepository.findAllByAttributeIdIn(attributeIdList);
+	public List<FindPValuesByAttributeIdList> findAllByAttributeIdList(
+			List<UUID> attributeIdList,
+			boolean includeDeleted
+	) {
+		List<PValue> pValues = List.of();
+		
+		if (includeDeleted) {
+			pValues = _pValueRepository.findAllByAttributeIdIn(attributeIdList);
+		}
+		else {
+			pValues = _pValueRepository.findAllByDeletedAtIsNullAndAttributeIdIn(attributeIdList);
+		}
 		
 		List<FindPValuesByAttributeIdList> response = pValues.stream().map(pValue -> {
 			FindPValuesByAttributeIdList findPValuesByAttributeIdList = new FindPValuesByAttributeIdList();
@@ -105,8 +132,18 @@ public class PValueService implements IPValueService {
 	}
 
 	@Override
-	public List<FindPValuesByProductIdList> findAllByProductIdList(List<UUID> productIdList) {
-		List<PValue> pValues = _pValueRepository.findAllByProductIdIn(productIdList);
+	public List<FindPValuesByProductIdList> findAllByProductIdList(
+			List<UUID> productIdList,
+			boolean includeDeleted
+	) {
+		List<PValue> pValues = List.of();
+		
+		if (includeDeleted) {
+			pValues = _pValueRepository.findAllByProductIdIn(productIdList);
+		}
+		else {
+			pValues = _pValueRepository.findAllByDeletedAtIsNullAndProductIdIn(productIdList);
+		}
 		
 		List<FindPValuesByProductIdList> response = pValues.stream().map(pValue -> {
 			FindPValuesByProductIdList findPValuesByProductIdList = new FindPValuesByProductIdList();
@@ -123,12 +160,19 @@ public class PValueService implements IPValueService {
 	}
 
 	@Override
-	public List<FindAllProductByCategoryIdAndAttributeIdAndValueResponse> findAllProductByCategoryIdAndAttributeIdAndValue(FindAllProductByCategoryIdAndAttributeIdValueUnitTuplesDto dto) {
+	public List<FindAllProductByCategoryIdAndAttributeIdAndValueResponse> findAllProductByCategoryIdAndAttributeIdAndValue(
+			FindAllProductByCategoryIdAndAttributeIdValueUnitTuplesDto dto,
+			boolean includeDeleted
+	) {
 		StringBuilder sqlStringBuilder = new StringBuilder("select p from Product p\r\n"
 				+ "join Category c on c.id = p.category.id\r\n"
 				+ "join PValue v on v.product.id = p.id\r\n"
 				+ "join Attribute a on a.id = v.attribute.id\r\n"
 				+ "where p.category.id = :categoryId\r\n");
+		
+		if (!includeDeleted) {
+			sqlStringBuilder.append("and where p.deletedAt is null\r\n");
+		}
 		
 		List<AttributeIdValueUnitTuple> tuples = dto.getAttributeIdValueUnitTuples();
 
@@ -154,7 +198,7 @@ public class PValueService implements IPValueService {
 		if (n > 0) {
 			sqlStringBuilder.append(String.format("having count(distinct (v.attribute.id, v.value, v.unit.id)) = %d", n));
 		}
-		String sql = sqlStringBuilder.toString();
+
 	    TypedQuery<Product> query = _entityManager.createQuery(sqlStringBuilder.toString(), Product.class);
 	    query.setParameter("categoryId", dto.getCategoryId());
 	    
