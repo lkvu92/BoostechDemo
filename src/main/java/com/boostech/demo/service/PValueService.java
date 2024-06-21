@@ -17,6 +17,7 @@ import com.boostech.demo.entity.Attribute;
 import com.boostech.demo.entity.PValue;
 import com.boostech.demo.entity.Product;
 import com.boostech.demo.exception.AttributeNotFoundException;
+import com.boostech.demo.exception.PValueConflictException;
 import com.boostech.demo.exception.PValueNotFoundException;
 import com.boostech.demo.exception.ProductNotFoundException;
 import com.boostech.demo.repository.IAttributeRepository;
@@ -98,14 +99,20 @@ public class PValueService implements IPValueService {
 	@Override
 	@Transactional
 	public void createValueById(CreateValueByIdDto dto) {
-		Optional<Product> productOptional = _productRepository.findById(dto.getProductId());
-		if (productOptional.isEmpty()) {
-			throw new ProductNotFoundException(dto.getProductId());
+		UUID productId = dto.getProductId(), attributeId = dto.getAttributeId();
+		
+		if (_pValueRepository.existsByProductIdAndAttributeId(productId, attributeId)) {
+			throw new PValueConflictException(String.format("value existed on 'product id' = %s and 'attribute id' = %s", productId, attributeId));
 		}
 		
-		Optional<Attribute> attributeOptional = _attributeRepository.findById(dto.getAttributeId());
+		Optional<Product> productOptional = _productRepository.findById(productId);
+		if (productOptional.isEmpty()) {
+			throw new ProductNotFoundException(productId);
+		}
+		
+		Optional<Attribute> attributeOptional = _attributeRepository.findById(attributeId);
 		if (attributeOptional.isEmpty()) {
-			throw new AttributeNotFoundException(dto.getAttributeId());
+			throw new AttributeNotFoundException(attributeId);
 		}
 		
 
