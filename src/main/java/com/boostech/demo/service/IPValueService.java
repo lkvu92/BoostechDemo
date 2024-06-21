@@ -3,11 +3,7 @@ package com.boostech.demo.service;
 import java.util.List;
 import java.util.UUID;
 
-import com.boostech.demo.dto.CreateValueByIdDto;
-import com.boostech.demo.dto.DeleteValueByProductIdAndAttributeIdDto;
-import com.boostech.demo.dto.FindAllProductByCategoryIdAndAttributeIdValueUnitTuplesDto;
-import com.boostech.demo.dto.UpdateValueByIdDto;
-import com.boostech.demo.dto.UpdateValueByProductIdAndAttributeIdDto;
+import com.boostech.demo.dto.*;
 import com.boostech.demo.entity.PValue;
 import com.boostech.demo.entity.Product;
 
@@ -33,4 +29,6 @@ public interface IPValueService {
 	
 	boolean deleteValueById(UUID id);
 	boolean deleteValueByProductIdAndAttributeId(DeleteValueByProductIdAndAttributeIdDto dto);
+
+	void createValueByProductIdAndAttributeIdValueUnitTuples(Product product, List<AttributeValueUnitTuple> attributeIdValueUnitTuples);
 }

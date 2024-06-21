@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class FindAllProductByCategoryIdAndAttributeIdValueUnitTuplesDto {
 	private UUID categoryId;
-	private List<AttributeIdValueUnitTuple> attributeIdValuePairs;
+	private List<AttributeIdValueUnitTuple> attributeIdValueUnitTuples;
 }

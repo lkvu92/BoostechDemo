@@ -6,16 +6,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.boostech.demo.dto.*;
 import com.boostech.demo.entity.Unit;
 import com.boostech.demo.repository.IUnitRepository;
+import lombok.Value;
 import org.springframework.stereotype.Service;
 
-import com.boostech.demo.dto.FindAllProductByCategoryIdAndAttributeIdValueUnitTuplesDto;
-import com.boostech.demo.dto.UpdateValueByIdDto;
-import com.boostech.demo.dto.UpdateValueByProductIdAndAttributeIdDto;
-import com.boostech.demo.dto.AttributeIdValueUnitTuple;
-import com.boostech.demo.dto.CreateValueByIdDto;
-import com.boostech.demo.dto.DeleteValueByProductIdAndAttributeIdDto;
 import com.boostech.demo.entity.Attribute;
 import com.boostech.demo.entity.PValue;
 import com.boostech.demo.entity.Product;
@@ -87,7 +83,7 @@ public class PValueService implements IPValueService {
 				+ "join Attribute a on a.id = v.attribute.id\r\n"
 				+ "where p.category.id = :categoryId\r\n");
 		
-		List<AttributeIdValueUnitTuple> tuples = dto.getAttributeIdValuePairs();
+		List<AttributeIdValueUnitTuple> tuples = dto.getAttributeIdValueUnitTuples();
 		
 	    for (int i = 0; i < tuples.size(); i++) {
 		    sqlStringBuilder.append(String.format("and v.attribute.id = :attributeId%s\r\n"
@@ -285,5 +281,36 @@ public class PValueService implements IPValueService {
 		
 		return delete;
 	}
-	
+
+	@Override
+	public void createValueByProductIdAndAttributeIdValueUnitTuples(Product product, List<AttributeValueUnitTuple> attributeIdValueUnitTuples) {
+		for (AttributeValueUnitTuple tuple : attributeIdValueUnitTuples) {
+			UUID unitId = tuple.getUnitId();
+			String value = tuple.getValue();
+			Attribute attribute = tuple.getAttribute();
+			PValue pValue = new PValue();
+
+			if (unitId != null) {
+				Optional<Unit> unitOptional = _unitRepository.findById(unitId);
+				if (unitOptional.isEmpty()) {
+					throw new UnitNotFoundException(unitId);
+				}
+
+				boolean checkUnitInAttribute = _attributeRepository.existsByIdAndUnitsId(attribute.getId(), unitId);
+				if (!checkUnitInAttribute) {
+					throw new UnitNotInAttributeException(String.format("Unit '%s' not in attribute '%s'", unitId, attribute.getId()));
+				}
+
+				pValue.setUnit(unitOptional.get());
+			}
+
+			pValue.setProduct(product);
+			pValue.setAttribute(attribute);
+
+			product.getValues().add(pValue);
+		}
+
+		_productRepository.save(product);
+	}
+
 }

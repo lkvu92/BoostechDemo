@@ -2,6 +2,7 @@ package com.boostech.demo.service;
 
 import com.boostech.demo.dto.*;
 import com.boostech.demo.dto.reqDto.AttributeValueDto;
+import com.boostech.demo.dto.reqDto.ProductCreateDto;
 import com.boostech.demo.entity.Attribute;
 import com.boostech.demo.entity.Category;
 import com.boostech.demo.entity.PValue;
@@ -11,7 +12,6 @@ import com.boostech.demo.repository.IAttributeRepository;
 import com.boostech.demo.repository.PValueRepository;
 import com.boostech.demo.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +29,7 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final PValueRepository pValueRepository;
     private final IAttributeRepository attributeRepository;
+    private final IPValueService pValueService;
 
     public List<Product> getAllProducts() {
         return productRepository.findAll();
@@ -181,16 +182,18 @@ public class ProductService {
      * Create product full version
      */
     @Transactional
-    public Product createProductFullVersion(ProductCreateDto productCreateDto, List<AttributeValueDto> attributeValueDto) {
+    public Product createProductFullVersion(ProductCreateDto productCreateDto) {
        //input Product, List<Attribute>
         Optional<Category> categoryOptional = categoryRepository.findById(productCreateDto.getCate_id());
         if (categoryOptional.isEmpty()) {
             throw new IllegalArgumentException("Category not found");
         }
         Category category = categoryOptional.get();
-        List<Attribute> getAttributes = category.getAttributes();
+        List<Attribute> attributes = category.getAttributes();
         //Check list attr isqual list attr in cate , if not return null
-        if(!CheckListAttribute(getAttributes, attributeValueDto)){
+
+        Map<UUID, Attribute> listAttributeOfCateMap = CheckListAttribute(attributes, productCreateDto.getAttributeValues());
+        if(listAttributeOfCateMap == null){
             throw new IllegalArgumentException("Size of listAttributeOfCate cannot be greater than size of listAttributeOfProduct.");
         }
         //Create product
@@ -200,13 +203,25 @@ public class ProductService {
         product.setCategory(cate.get());
         productRepository.save(product);
         //Create list value
+        List<AttributeValueUnitTuple>  attributeIdValueUnitTuples = new ArrayList<>();
+        for (AttributeValueDto attributeValue : productCreateDto.getAttributeValues()) {
+            UUID attributeId = attributeValue.getAttributeId();
+            Attribute attribute = listAttributeOfCateMap.get(attributeId);
+            String value = attributeValue.getValue();
+            UUID unitId = attributeValue.getUnitId();
 
-        return null;
+            AttributeValueUnitTuple attributeValueUnitTuple = new AttributeValueUnitTuple(attribute, value, unitId);
+            attributeIdValueUnitTuples.add(attributeValueUnitTuple);
+        }
+
+        pValueService.createValueByProductIdAndAttributeIdValueUnitTuples(product, attributeIdValueUnitTuples);
+
+        return product;
     }
 
-    private boolean CheckListAttribute(List<Attribute> listAttributeOfCate, List<AttributeValueDto> listAttributeOfProduct){
+    private Map<UUID, Attribute> CheckListAttribute(List<Attribute> listAttributeOfCate, List<AttributeValueDto> listAttributeOfProduct){
         if(listAttributeOfCate.size() > listAttributeOfProduct.size()){
-            return false;
+            return null;
         }
 
         Map<UUID, Attribute> listAttributeOfCateMap = new HashMap<>();
@@ -216,10 +231,10 @@ public class ProductService {
 
         for (AttributeValueDto attributedto : listAttributeOfProduct) {
             if (!listAttributeOfCateMap.containsKey(attributedto.getAttributeId())) {
-                return false;
+                return null;
             }
         }
 
-        return true;
+        return listAttributeOfCateMap;
     }
 }

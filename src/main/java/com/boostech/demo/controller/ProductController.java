@@ -2,7 +2,7 @@ package com.boostech.demo.controller;
 
 import com.boostech.demo.dto.CustomProductResponse;
 import com.boostech.demo.dto.GetOneProductDto;
-import com.boostech.demo.dto.ProductCreateDto;
+import com.boostech.demo.dto.reqDto.ProductCreateDto;
 import com.boostech.demo.entity.Product;
 import com.boostech.demo.service.ProductService;
 import com.boostech.demo.util.CustomResponse;
@@ -46,8 +46,8 @@ public class ProductController {
         return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping()
-    public ResponseEntity<CustomResponse<Product>> saveProduct(@RequestBody ProductCreateDto productCreateDto)  {
+    @PostMapping("/createv1")
+    public ResponseEntity<CustomResponse<Product>> saveProduct1(@RequestBody ProductCreateDto productCreateDto)  {
         Product product = productService.saveProduct(productCreateDto);
         if(product == null) {
             return new ResponseEntity<>(new CustomResponse<>("Product fail!", 400, null), HttpStatus.BAD_REQUEST);
@@ -79,5 +79,14 @@ public class ProductController {
     @GetMapping("/getoneproduct/{id}")
     public GetOneProductDto getoneproduct(@PathVariable UUID id) {
         return productService.getOneProductDtos(id);
+    }
+
+    @PostMapping()
+    public ResponseEntity<CustomResponse<Product>> saveProduct(@RequestBody ProductCreateDto productCreateDto)  {
+        Product product = productService.createProductFullVersion(productCreateDto);
+//        if(product == null) {
+//            return new ResponseEntity<>(new CustomResponse<>("Product fail!", 400, null), HttpStatus.BAD_REQUEST);
+//        }
+        return new ResponseEntity<CustomResponse<Product>>(new CustomResponse<>("Product created successfully", 201, product), HttpStatus.CREATED);
     }
 }
