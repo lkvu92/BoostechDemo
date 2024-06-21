@@ -13,7 +13,6 @@ import com.boostech.demo.entity.PValue;
 public interface PValueRepository extends JpaRepository<PValue, UUID> {
 //	Optional<PValue> findByValueId_ProductId(UUID productId);
 //	Optional<PValue> findByValueId_AttributeId(UUID attributeId);
-
 	boolean existsByProductIdAndAttributeId(@Param(value = "productId") UUID productId, @Param(value = "attributeId") UUID attributeId);
 	Optional<PValue> findByProductIdAndAttributeId(UUID productId, UUID attributeId);
 	Optional<PValue> findByProductIdAndAttributeIdAndDeletedAtIsNull(UUID productId, UUID attributeId);

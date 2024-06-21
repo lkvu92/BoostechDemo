@@ -50,10 +50,14 @@ public class PValueService implements IPValueService {
 	}
 
 	@Override
-	public List<PValue>findByProductIdAndAttributeId(DeleteValueByIdDto dto) {
-		List<PValue> values = _pValueRepository.findByProductIdAndAttributeIdAndDeletedAtIsNull(dto.getProductId(), dto.getAttributeId());
+	public PValue findByProductIdAndAttributeId(DeleteValueByIdDto dto) {
+		Optional<PValue> pValueOptional = _pValueRepository.findByProductIdAndAttributeId(dto.getProductId(), dto.getAttributeId());
 
-		return values;
+		if (pValueOptional.isEmpty()) {
+			throw new PValueNotFoundException(dto.getProductId(), dto.getAttributeId());
+		}
+
+		return pValueOptional.get();
 	}
 
 	@Override
@@ -72,7 +76,7 @@ public class PValueService implements IPValueService {
 
 	@Override
 	public List<Product> findAllProductByCategoryIdAndAttributeIdAndValue(FindAllProductByCategoryIdAndAttributeIdValuePairsDto dto) {
-		StringBuilder sqlStringBuilder = new StringBuilder("select p.id, p.name from Product p\r\n"
+		StringBuilder sqlStringBuilder = new StringBuilder("select p from Product p\r\n"
 				+ "join Category c on c.id = p.category.id\r\n"
 				+ "join PValue v on  v.product.id = p.id\r\n"
 				+ "join Attribute a on a.id = v.attribute.id\r\n"

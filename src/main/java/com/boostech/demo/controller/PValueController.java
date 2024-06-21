@@ -44,10 +44,10 @@ public class PValueController {
 	private final IPValueService _pValueService;
 	
 	@GetMapping
-	public ResponseEntity<List<PValue>> findByProductIdAndAttributeId(@RequestBody DeleteValueByIdDto request) {
-		List<PValue> values = _pValueService.findByProductIdAndAttributeId(request);
+	public ResponseEntity<PValue> findByProductIdAndAttributeId(@RequestBody DeleteValueByIdDto request) {
+		PValue value = _pValueService.findByProductIdAndAttributeId(request);
 		
-		return ResponseEntity.ok(values);
+		return ResponseEntity.ok(value);
 	}
 
 	@GetMapping("{id}")

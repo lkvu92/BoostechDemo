@@ -75,7 +75,8 @@ public class ProductController {
             return new ResponseEntity<>(new CustomResponse<>("Product restored successfully", 200, null), HttpStatus.OK);
         }
     }
-    @GetMapping("/abc/{id}")
+
+    @GetMapping("/getoneproduct/{id}")
     public GetOneProductDto getoneproduct(@PathVariable UUID id) {
         return productService.getOneProductDtos(id);
     }

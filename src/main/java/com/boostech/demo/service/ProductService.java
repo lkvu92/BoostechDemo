@@ -19,9 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class ProductService {
@@ -153,6 +151,11 @@ public class ProductService {
         return "/api/products?page=" + pageable.getPageNumber() + "&size=" + pageable.getPageSize();
     }
 
+    /**
+     * Get one product by id with custom response
+     * @param productId
+     * @return
+     */
     public GetOneProductDto getOneProductDtos(UUID productId) {
         Product product = productRepository.findById(productId).orElse(null);
         if (product == null) {
@@ -176,7 +179,32 @@ public class ProductService {
 
             dto.getAttributes().add(attributeDto);
         }
-
         return dto;
+    }
+    /**
+     * Create product full version
+     */
+    public Product createProductFullVersion(ProductCreateDto productCreateDto, List<Attribute> attributess) {
+       //input Product, List<Attribute>
+        List<Attribute> getAttributes = categoryRepository.findById(productCreateDto.getCate_id()).get().getAttributes();
+        //Check list attr isqual list attr in cate , if not return null
+        if(!compareListAttribute(getAttributes, attributess)){
+            return null;
+        }
+        //create transaction
+        //create list attribute
+        //Create product
+
+        return null;
+    }
+
+    private boolean compareListAttribute(List<Attribute> listAttributeOfCate, List<Attribute> listAttributeOfProduct){
+        Set<Attribute> listAttributeOfCateSet = new HashSet<>(listAttributeOfCate);
+        Set<Attribute> listAttributeOfProductSet = new HashSet<>(listAttributeOfProduct);
+
+        Set<Attribute> commonElements = new HashSet<>(listAttributeOfCateSet);
+        commonElements.retainAll(listAttributeOfProductSet);
+
+        return commonElements.size() == listAttributeOfCateSet.size();
     }
 }
