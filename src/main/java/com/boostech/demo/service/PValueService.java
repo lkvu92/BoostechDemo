@@ -131,17 +131,34 @@ public class PValueService implements IPValueService {
 				+ "where p.category.id = :categoryId\r\n");
 		
 		List<AttributeIdValueUnitTuple> tuples = dto.getAttributeIdValueUnitTuples();
-		
-	    for (int i = 0; i < tuples.size(); i++) {
-		    sqlStringBuilder.append(String.format("and v.attribute.id = :attributeId%s\r\n"
-		    		+ "and v.value = :value%s\r\n"
-		    		+ "and v.unit.id = :unitId%s\r\n", i, i));
+
+		int n = tuples.size();
+
+		if (n > 0) {
+			sqlStringBuilder.append("and (v.attribute.id, v.value, v.unit.id) in (\r\n");
+		}
+	    for (int i = 0; i < n; i++) {
+		    sqlStringBuilder.append(String.format("(:attributeId%s, :value%s, :unitId%s)", i, i, i));
+			if (i != n - 1) {
+				sqlStringBuilder.append(",");
+			}
+			sqlStringBuilder.append("\r\n");
 	    }
-	    
+
+		if (n > 0) {
+			sqlStringBuilder.append(")\r\n");
+		}
+
+		sqlStringBuilder.append("group by p.id\r\n");
+
+		if (n > 0) {
+			sqlStringBuilder.append(String.format("having count(distinct (v.attribute.id, v.value, v.unit.id)) = %d", n));
+		}
+		String sql = sqlStringBuilder.toString();
 	    TypedQuery<Product> query = _entityManager.createQuery(sqlStringBuilder.toString(), Product.class);
 	    query.setParameter("categoryId", dto.getCategoryId());
 	    
-	    for (int i = 0; i < tuples.size(); i++) {
+	    for (int i = 0; i < n; i++) {
 	    	AttributeIdValueUnitTuple tuple = tuples.get(i);
 	    	
 	    	query.setParameter("attributeId" + i, tuple.id);

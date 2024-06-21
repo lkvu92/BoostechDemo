@@ -21,6 +21,6 @@ public class Product extends BaseEntity {
     @JoinColumn(name = "cate_id")
     private Category category;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     List<PValue> values = new ArrayList<>();
 }

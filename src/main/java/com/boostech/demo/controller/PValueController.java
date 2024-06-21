@@ -90,7 +90,7 @@ public class PValueController {
 	@GetMapping("products")
 	public ResponseEntity<List<FindAllProductByCategoryIdAndAttributeIdAndValueResponse>> findAllProductByCategoryIdAndAttributeIdValuePairs(
 			@RequestBody FindAllProductByCategoryIdAndAttributeIdValueUnitTuplesDto request,
-			@RequestParam(name = "includeDeleted") boolean includeDeleted) {
+			@RequestParam(name = "includeDeleted", required = false) boolean includeDeleted) {
 		List<FindAllProductByCategoryIdAndAttributeIdAndValueResponse> response = _pValueService.findAllProductByCategoryIdAndAttributeIdAndValue(request);
 		
 		return ResponseEntity.ok(response);	
