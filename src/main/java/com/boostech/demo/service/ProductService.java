@@ -1,7 +1,7 @@
 package com.boostech.demo.service;
 
 import com.boostech.demo.dto.CustomProductResponse;
-import com.boostech.demo.dto.FindAllProductByCategoryIdAndAttributeIdValuePairsDto;
+import com.boostech.demo.dto.FindAllProductByCategoryIdAndAttributeIdValueUnitTuplesDto;
 import com.boostech.demo.dto.GetOneProductDto;
 import com.boostech.demo.dto.ProductCreateDto;
 import com.boostech.demo.entity.Attribute;
