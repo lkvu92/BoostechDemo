@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.query.Param;
 
 import com.boostech.demo.entity.PValue;
 
@@ -13,7 +12,7 @@ import com.boostech.demo.entity.PValue;
 public interface PValueRepository extends JpaRepository<PValue, UUID> {
 //	Optional<PValue> findByValueId_ProductId(UUID productId);
 //	Optional<PValue> findByValueId_AttributeId(UUID attributeId);
-	boolean existsByProductIdAndAttributeId(@Param(value = "productId") UUID productId, @Param(value = "attributeId") UUID attributeId);
+	boolean existsByProductIdAndAttributeId(UUID productId, UUID attributeId);
 	Optional<PValue> findByProductIdAndAttributeId(UUID productId, UUID attributeId);
 	Optional<PValue> findByProductIdAndAttributeIdAndDeletedAtIsNull(UUID productId, UUID attributeId);
 	List<PValue> findAllByAttributeIdIn(List<UUID> attributeIdList);

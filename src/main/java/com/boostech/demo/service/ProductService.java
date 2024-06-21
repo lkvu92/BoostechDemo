@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -194,8 +193,6 @@ public class ProductService {
         if(!CheckListAttribute(getAttributes, attributeValueDto)){
             throw new IllegalArgumentException("Size of listAttributeOfCate cannot be greater than size of listAttributeOfProduct.");
         }
-        //Get list attribute not in cate
-        List<AttributeValueDto> listAttributeOfProductSet = getNonMatchingAttributes(getAttributes, attributeValueDto);
         //Create product
         Optional<Category> cate = categoryRepository.findById(productCreateDto.getCate_id());
         Product product = new Product();
@@ -224,14 +221,5 @@ public class ProductService {
         }
 
         return true;
-    }
-    private List<AttributeValueDto> getNonMatchingAttributes(List<Attribute> listAttributeOfCate, List<AttributeValueDto> listAttributeOfProduct){
-        List<UUID> listAttributeOfCateSet = listAttributeOfCate.stream().map(Attribute::getId).toList();
-
-        List<AttributeValueDto> listAttributeOfProductSet = listAttributeOfProduct
-                .stream()
-                .filter(dto -> !listAttributeOfCateSet.contains(dto.getAttributeId()))
-                .toList();
-        return listAttributeOfProductSet;
     }
 }
