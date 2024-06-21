@@ -1,6 +1,7 @@
 package com.boostech.demo.service;
 
-import com.boostech.demo.dto.CategoryDTO;
+import com.boostech.demo.dto.CategoryRequestDTO;
+import com.boostech.demo.dto.CategoryResponseDto;
 import com.boostech.demo.entity.Attribute;
 import com.boostech.demo.entity.Category;
 import com.boostech.demo.repository.AttributeRepository;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,13 +29,24 @@ public class CategoryService {
      * Get all categories
      * @return
      */
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+    public List<CategoryResponseDto> getAllCategories() {
+        List<Category> categories = categoryRepository.findAll();
+        List<CategoryResponseDto> categoryDtos = new ArrayList<>();
+        for (Category category : categories) {
+            CategoryResponseDto dto = new CategoryResponseDto();
+            dto.setId(category.getId());
+            dto.setCreatedAt(category.getCreatedAt());
+            dto.setUpdatedAt(category.getUpdatedAt());
+            dto.setDeletedAt(category.getDeletedAt());
+            dto.setName(category.getName());
+            categoryDtos.add(dto);
+        }
+        return categoryDtos;
     }
 
     /**
      * Get category by id
-     * @param id
+     * @param id UUID
      * @return
      */
     public Optional<Category> getCategoryById(UUID id) {
@@ -42,26 +55,26 @@ public class CategoryService {
 
     /**
      * Create a new category
-     * @param categoryDTO
+     * @param categoryRequestDTO
      * @return
      */
-    public Category createCategory(CategoryDTO categoryDTO) {
+    public Category createCategory(CategoryRequestDTO categoryRequestDTO) {
         Category category = new Category();
-        category.setName(categoryDTO.getName());
+        category.setName(categoryRequestDTO.getName());
         return categoryRepository.save(category);
     }
 
     /**
      * Update a category
      * @param id
-     * @param categoryDTO
+     * @param categoryRequestDTO
      * @return
      */
-    public Category updateCategory(UUID id, CategoryDTO categoryDTO) {
+    public Category updateCategory(UUID id, CategoryRequestDTO categoryRequestDTO) {
         Optional<Category> categoryOpt = categoryRepository.findById(id);
         if (categoryOpt.isPresent()) {
             Category category = categoryOpt.get();
-            category.setName(categoryDTO.getName());
+            category.setName(categoryRequestDTO.getName());
             return categoryRepository.save(category);
         } else {
             throw new RuntimeException("Category not found");
@@ -132,12 +145,12 @@ public class CategoryService {
         Attribute attribute = getAttributeOrThrow(attributeId);
         if (isAdding) {
             if (category.getAttributes().contains(attribute)) {
-                throw new RuntimeException("Attribute already added to the category");
+                throw new RuntimeException("Attribute with ID " + attributeId +" - "+ " already added to the category");
             }
             category.addAttribute(attribute);
         } else {
             if (!category.getAttributes().contains(attribute)) {
-                throw new RuntimeException("Attribute not found in the category");
+                throw new RuntimeException("Attribute with ID " + attributeId +" - "+ " not found in the category");
             }
             category.removeAttribute(attribute);
         }

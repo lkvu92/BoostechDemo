@@ -1,6 +1,7 @@
 package com.boostech.demo.controller;
 
-import com.boostech.demo.dto.CategoryDTO;
+import com.boostech.demo.dto.CategoryRequestDTO;
+import com.boostech.demo.dto.CategoryResponseDto;
 import com.boostech.demo.entity.Category;
 import com.boostech.demo.service.CategoryService;
 import com.boostech.demo.util.CustomResponse;
@@ -21,15 +22,16 @@ public class CategoryController {
     private CategoryService categoryService;
 
     @GetMapping
-    public ResponseEntity<CustomResponse<List<Category>>> getAllCategories() {
-        List<Category> categories = categoryService.getAllCategories();
+    public ResponseEntity<CustomResponse<List<CategoryResponseDto>>> getAllCategories() {
+        List<CategoryResponseDto> categories = categoryService.getAllCategories();
         if (categories.isEmpty()) {
-            CustomResponse<List<Category>> response = new CustomResponse<>("No categories found", HttpStatus.NOT_FOUND.value(), null);
+            CustomResponse<List<CategoryResponseDto>> response = new CustomResponse<>
+                    ("No categories found", HttpStatus.NOT_FOUND.value(), null);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        } else {
-            CustomResponse<List<Category>> response = new CustomResponse<>("Success", HttpStatus.OK.value(), categories);
-            return new ResponseEntity<>(response, HttpStatus.OK);
         }
+        CustomResponse<List<CategoryResponseDto>> response = new CustomResponse<>
+                ("Success", HttpStatus.OK.value(), categories);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**
@@ -54,12 +56,12 @@ public class CategoryController {
     /**
      * Create a new category
      *
-     * @param categoryDTO category data
+     * @param categoryRequestDTO category data
      * @return category
      */
     @PostMapping("/create")
-    public ResponseEntity<CustomResponse<Category>> createCategory(@RequestBody CategoryDTO categoryDTO) {
-        Category category = categoryService.createCategory(categoryDTO);
+    public ResponseEntity<CustomResponse<Category>> createCategory(@RequestBody CategoryRequestDTO categoryRequestDTO) {
+        Category category = categoryService.createCategory(categoryRequestDTO);
         CustomResponse<Category> response = new CustomResponse<>("Success", HttpStatus.CREATED.value(), category);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -68,15 +70,15 @@ public class CategoryController {
      * Update a category
      *
      * @param id category id
-     * @param categoryDTO category data
+     * @param categoryRequestDTO category data
      * @return category
      */
 
     @PutMapping("/{id}")
     public ResponseEntity<CustomResponse<Category>> updateCategory(
             @PathVariable UUID id,
-            @RequestBody CategoryDTO categoryDTO) {
-        Category category = categoryService.updateCategory(id, categoryDTO);
+            @RequestBody CategoryRequestDTO categoryRequestDTO) {
+        Category category = categoryService.updateCategory(id, categoryRequestDTO);
         CustomResponse<Category> response = new CustomResponse<>
                 ("Success", HttpStatus.OK.value(), category);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -107,13 +109,13 @@ public class CategoryController {
      * Add attributes to category
      *
      * @param id category id
-     * @param categoryDTO category data
+     * @param categoryRequestDTO category data
      * @return category
      */
     @PostMapping("/addAttributes/{id}")
-    public ResponseEntity<CustomResponse<Category>> addAttributesToCategory(@PathVariable UUID id, @RequestBody CategoryDTO categoryDTO) {
+    public ResponseEntity<CustomResponse<Category>> addAttributesToCategory(@PathVariable UUID id, @RequestBody CategoryRequestDTO categoryRequestDTO) {
         try {
-            Category category = categoryService.addAttributesToCategory(id, categoryDTO.getAttributeIds());
+            Category category = categoryService.addAttributesToCategory(id, categoryRequestDTO.getAttributeIds());
             CustomResponse<Category> response = new CustomResponse<>("Success", HttpStatus.OK.value(), category);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (RuntimeException e) {
@@ -127,15 +129,15 @@ public class CategoryController {
      * Remove attributes from category
      *
      * @param id category id
-     * @param categoryDTO category data
+     * @param categoryRequestDTO category data
      * @return category
      */
     @PostMapping("/removeAttributes/{id}")
     public ResponseEntity<CustomResponse<Category>> removeAttributesFromCategory(
             @PathVariable UUID id,
-            @RequestBody CategoryDTO categoryDTO) {
+            @RequestBody CategoryRequestDTO categoryRequestDTO) {
         try {
-            Category category = categoryService.removeAttributesFromCategory(id, categoryDTO.getAttributeIds());
+            Category category = categoryService.removeAttributesFromCategory(id, categoryRequestDTO.getAttributeIds());
             CustomResponse<Category> response = new CustomResponse<>
                     ("Success", HttpStatus.OK.value(), category);
             return new ResponseEntity<>(response, HttpStatus.OK);
