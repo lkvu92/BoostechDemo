@@ -8,8 +8,9 @@ plugins {
 
 sonar {
   properties {
-    property "sonar.projectKey", "lkvu92_boostechdemo_77e59a9f-d518-4670-b4e7-f9cbd069055e"
-    property "sonar.projectName", "boostechdemo"
+    property "sonar.projectKey", "boostech"
+    property "sonar.projectName", "boostech"
+	  property "sonar.token", "sqp_61b958229ab2ee5cf4796288295dd2b32352e6fe"
   }
 }
 
@@ -42,6 +43,9 @@ dependencies {
 	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+	testImplementation 'org.mockito:mockito-core:3.11.2'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }
 
 tasks.named('test') {

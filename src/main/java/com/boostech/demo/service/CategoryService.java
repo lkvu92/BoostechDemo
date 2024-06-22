@@ -1,12 +1,15 @@
 package com.boostech.demo.service;
 
-import com.boostech.demo.dto.CategoryRequestDTO;
-import com.boostech.demo.dto.CategoryResponseDto;
+import com.boostech.demo.dto.reqDto.CategoryRequestDTO;
+import com.boostech.demo.dto.resDto.CategoryResponseDto;
 import com.boostech.demo.entity.Attribute;
 import com.boostech.demo.entity.Category;
+import com.boostech.demo.exception.attribute.AttributeAlreadyAddedException;
+import com.boostech.demo.exception.attribute.AttributeNotFoundException;
+import com.boostech.demo.exception.category.CategoryNotFoundException;
 import com.boostech.demo.repository.AttributeRepository;
 import com.boostech.demo.repository.CategoryRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.boostech.demo.util.CategoryToCategoryResponseDtoConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,11 +22,17 @@ import java.util.UUID;
 @Service
 public class CategoryService {
 
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
+    private final AttributeRepository attributeRepository;
+    private final CategoryToCategoryResponseDtoConverter converter;
 
-    @Autowired
-    private AttributeRepository attributeRepository;
+    private static final String CATEGORY_NOT_FOUND = "Category not found";
+
+    public CategoryService(CategoryRepository categoryRepository, AttributeRepository attributeRepository, CategoryToCategoryResponseDtoConverter converter) {
+        this.categoryRepository = categoryRepository;
+        this.attributeRepository = attributeRepository;
+        this.converter = converter;
+    }
 
     /**
      * Get all categories
@@ -53,6 +62,11 @@ public class CategoryService {
         return categoryRepository.findById(id);
     }
 
+    public Optional<CategoryResponseDto> getOneCategoryWithoutAttributes(UUID id) {
+        Optional<Category> category = categoryRepository.getOneWithoutAttributes(id);
+        return category.map(converter::convert);
+    }
+
     /**
      * Create a new category
      * @param categoryRequestDTO
@@ -77,7 +91,7 @@ public class CategoryService {
             category.setName(categoryRequestDTO.getName());
             return categoryRepository.save(category);
         } else {
-            throw new RuntimeException("Category not found");
+            throw new CategoryNotFoundException(CATEGORY_NOT_FOUND);
         }
     }
 
@@ -91,12 +105,12 @@ public class CategoryService {
         if (categoryOpt.isPresent()) {
             Category category = categoryOpt.get();
             if (category.getDeletedAt() != null) {
-                throw new RuntimeException("Category already deleted");
+                throw new CategoryNotFoundException("Category already deleted");
             }
             category.setDeletedAt(LocalDateTime.now());
             categoryRepository.save(category);
         } else {
-            throw new RuntimeException("Category not found");
+            throw new CategoryNotFoundException(CATEGORY_NOT_FOUND);
         }
     }
 
@@ -145,12 +159,12 @@ public class CategoryService {
         Attribute attribute = getAttributeOrThrow(attributeId);
         if (isAdding) {
             if (category.getAttributes().contains(attribute)) {
-                throw new RuntimeException("Attribute with ID " + attributeId +" - "+ " already added to the category");
+                throw new AttributeAlreadyAddedException("Attribute with ID " + attributeId +" - "+ " already added to the category");
             }
             category.addAttribute(attribute);
         } else {
             if (!category.getAttributes().contains(attribute)) {
-                throw new RuntimeException("Attribute with ID " + attributeId +" - "+ " not found in the category");
+                throw new AttributeNotFoundException("Attribute with ID " + attributeId +" - "+ " not found in the category");
             }
             category.removeAttribute(attribute);
         }
@@ -163,7 +177,7 @@ public class CategoryService {
      */
     private Category getCategoryOrThrow(UUID categoryId) {
         return categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new RuntimeException(CATEGORY_NOT_FOUND));
     }
 
     /**

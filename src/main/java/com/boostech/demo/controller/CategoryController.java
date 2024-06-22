@@ -1,11 +1,10 @@
 package com.boostech.demo.controller;
 
-import com.boostech.demo.dto.CategoryRequestDTO;
-import com.boostech.demo.dto.CategoryResponseDto;
+import com.boostech.demo.dto.reqDto.CategoryRequestDTO;
+import com.boostech.demo.dto.resDto.CategoryResponseDto;
 import com.boostech.demo.entity.Category;
 import com.boostech.demo.service.CategoryService;
 import com.boostech.demo.util.CustomResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,8 +17,12 @@ import java.util.UUID;
 @RequestMapping("/api/v1/category")
 public class CategoryController {
 
-    @Autowired
-    private CategoryService categoryService;
+    private final CategoryService categoryService;
+    private static final String SUCCESS_MESSAGE = "success";
+
+    public CategoryController(CategoryService categoryService) {
+        this.categoryService = categoryService;
+    }
 
     @GetMapping
     public ResponseEntity<CustomResponse<List<CategoryResponseDto>>> getAllCategories() {
@@ -30,7 +33,7 @@ public class CategoryController {
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
         CustomResponse<List<CategoryResponseDto>> response = new CustomResponse<>
-                ("Success", HttpStatus.OK.value(), categories);
+                (SUCCESS_MESSAGE, HttpStatus.OK.value(), categories);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -45,10 +48,23 @@ public class CategoryController {
         Optional<Category> categoryOpt = categoryService.getCategoryById(id);
         if (categoryOpt.isPresent()) {
             CustomResponse<Category> response = new CustomResponse<>
-                    ("Success", HttpStatus.OK.value(), categoryOpt.get());
+                    (SUCCESS_MESSAGE, HttpStatus.OK.value(), categoryOpt.get());
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
         CustomResponse<Category> response = new CustomResponse<>
+                ("Category not found", HttpStatus.NOT_FOUND.value(), null);
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping("/getOneWithoutAttributes/{id}")
+    public ResponseEntity<CustomResponse<CategoryResponseDto>> getOneCategoryWithoutAttributes(@PathVariable UUID id) {
+        Optional<CategoryResponseDto> categoryOpt = categoryService.getOneCategoryWithoutAttributes(id);
+        if (categoryOpt.isPresent()) {
+            CustomResponse<CategoryResponseDto> response = new CustomResponse<>
+                    (SUCCESS_MESSAGE, HttpStatus.OK.value(), categoryOpt.get());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        CustomResponse<CategoryResponseDto> response = new CustomResponse<>
                 ("Category not found", HttpStatus.NOT_FOUND.value(), null);
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
@@ -62,7 +78,7 @@ public class CategoryController {
     @PostMapping("/create")
     public ResponseEntity<CustomResponse<Category>> createCategory(@RequestBody CategoryRequestDTO categoryRequestDTO) {
         Category category = categoryService.createCategory(categoryRequestDTO);
-        CustomResponse<Category> response = new CustomResponse<>("Success", HttpStatus.CREATED.value(), category);
+        CustomResponse<Category> response = new CustomResponse<>(SUCCESS_MESSAGE, HttpStatus.CREATED.value(), category);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -80,7 +96,7 @@ public class CategoryController {
             @RequestBody CategoryRequestDTO categoryRequestDTO) {
         Category category = categoryService.updateCategory(id, categoryRequestDTO);
         CustomResponse<Category> response = new CustomResponse<>
-                ("Success", HttpStatus.OK.value(), category);
+                (SUCCESS_MESSAGE, HttpStatus.OK.value(), category);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -116,7 +132,7 @@ public class CategoryController {
     public ResponseEntity<CustomResponse<Category>> addAttributesToCategory(@PathVariable UUID id, @RequestBody CategoryRequestDTO categoryRequestDTO) {
         try {
             Category category = categoryService.addAttributesToCategory(id, categoryRequestDTO.getAttributeIds());
-            CustomResponse<Category> response = new CustomResponse<>("Success", HttpStatus.OK.value(), category);
+            CustomResponse<Category> response = new CustomResponse<>(SUCCESS_MESSAGE, HttpStatus.OK.value(), category);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (RuntimeException e) {
             CustomResponse<Category> response = new CustomResponse<>
@@ -139,7 +155,7 @@ public class CategoryController {
         try {
             Category category = categoryService.removeAttributesFromCategory(id, categoryRequestDTO.getAttributeIds());
             CustomResponse<Category> response = new CustomResponse<>
-                    ("Success", HttpStatus.OK.value(), category);
+                    (SUCCESS_MESSAGE, HttpStatus.OK.value(), category);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (RuntimeException e) {
             CustomResponse<Category> response = new CustomResponse<>
