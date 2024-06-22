@@ -145,10 +145,10 @@ public class PValueService implements IPValueService {
 		int n = tuples.size();
 
 		if (n > 0) {
-			sqlStringBuilder.append("and (v.attribute.id, v.value, v.unit.id) in (\r\n");
+			sqlStringBuilder.append("and (v.attribute.id, v.value) in (\r\n");
 		}
 	    for (int i = 0; i < n; i++) {
-		    sqlStringBuilder.append(String.format("(:attributeId%s, :value%s, :unitId%s)", i, i, i));
+		    sqlStringBuilder.append(String.format("(:attributeId%s, :value%s)", i, i, i));
 			if (i != n - 1) {
 				sqlStringBuilder.append(",");
 			}
@@ -162,7 +162,7 @@ public class PValueService implements IPValueService {
 		sqlStringBuilder.append("group by p.id\r\n");
 
 		if (n > 0) {
-			sqlStringBuilder.append(String.format("having count(distinct (v.attribute.id, v.value, v.unit.id)) = %d", n));
+			sqlStringBuilder.append(String.format("having count(distinct (v.attribute.id, v.value)) = %d", n));
 		}
 
 	    TypedQuery<Product> query = _entityManager.createQuery(sqlStringBuilder.toString(), Product.class);
@@ -173,7 +173,6 @@ public class PValueService implements IPValueService {
 	    	
 	    	query.setParameter("attributeId" + i, tuple.id);
 	    	query.setParameter("value" + i, tuple.value);
-	    	query.setParameter("unitId" + i, tuple.unitId);
 	    }
 	    
 	    
