@@ -82,20 +82,18 @@ public class ProductController {
     }
 
     @PostMapping()
-    public ResponseEntity<CustomResponse<GetOneProductDto>> saveProduct(@RequestBody ProductCreateDto productCreateDto)  {
-        GetOneProductDto product = productService.createProductWithAttributes(productCreateDto);
+    public ResponseEntity<CustomResponse<Void>> saveProduct(@RequestBody ProductCreateDto productCreateDto)  {
+        productService.createProductWithAttributes(productCreateDto);
 //        if(product == null) {
 //            return new ResponseEntity<>(new CustomResponse<>("Product fail!", 400, null), HttpStatus.BAD_REQUEST);
 //        }
-        return new ResponseEntity<CustomResponse<GetOneProductDto>>(new CustomResponse<>("Product created successfully", 201, product), HttpStatus.CREATED);
+        return new ResponseEntity<>(new CustomResponse<>("Product created successfully", 201, null), HttpStatus.CREATED);
     }
     @PutMapping("/{id}")
-    public ResponseEntity<CustomResponse<GetOneProductDto>> updateProduct(@PathVariable UUID id, @RequestBody ProductCreateDto productCreateDto)  {
-        GetOneProductDto product = productService.updateProductWithAttributes(productCreateDto, id);
-        if(product == null) {
-            return new ResponseEntity<>(new CustomResponse<>("Product not found", 404, null), HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(new CustomResponse<>("Product updated successfully", 200, product), HttpStatus.OK);
+    public ResponseEntity<CustomResponse<Void>> updateProduct(@PathVariable UUID id, @RequestBody ProductCreateDto productCreateDto)  {
+        productService.updateProductWithAttributes(productCreateDto, id);
+
+        return new ResponseEntity<>(new CustomResponse<>("Product updated successfully", 200, null), HttpStatus.OK);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

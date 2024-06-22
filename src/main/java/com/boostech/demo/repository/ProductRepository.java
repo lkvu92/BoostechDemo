@@ -7,9 +7,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ProductRepository extends JpaRepository<Product, UUID> {
+    @Query("select p from Product p join fetch p.category c join fetch p.values v join fetch v.attribute a join fetch a.unit where p.id = :id")
+    Optional<Product> findByIdWithCategoryAndAttributes(@Param(value = "id") UUID id);
+
     List<Product> findProductsByCategory_Id(UUID categoryId);
     Page<Product> findAllByDeletedAtIsNull(Pageable pageable);
     boolean existsByName(String name);

@@ -44,9 +44,7 @@ public class AttributeService implements IAttributeService {
             attribute.setAttributeName(attributeDto.getAttributeName());
 
             Unit unit = unitRepository.findById(attributeDto.getUnitId()).orElseThrow();
-            List<Unit> units = new ArrayList<>();
-            units.add(unit);
-            attribute.setUnits(units);
+            attribute.setUnit(unit);
 
             return repository.save(attribute);
         }catch (EntityNotFoundException e){
@@ -64,10 +62,7 @@ public class AttributeService implements IAttributeService {
             existingAttribute.setAttributeName(attributeDto.getAttributeName());
             Unit unit = unitRepository.findById(attributeDto.getUnitId()).orElseThrow();
 
-            List<Unit> unitList = new ArrayList<>();
-            unitList.add(unit);
-
-            existingAttribute.getUnits().add(unit); // Thêm Unit mới
+            existingAttribute.setUnit(unit); // Thêm Unit mới
             return repository.save(existingAttribute);
 
         }catch (EntityNotFoundException e){

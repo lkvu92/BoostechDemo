@@ -12,5 +12,4 @@ import java.util.UUID;
 public class AttributeValueDto {
     private UUID attributeId;
     private String value;
-    private UUID unitId;
 }

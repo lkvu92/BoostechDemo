@@ -137,7 +137,7 @@ public class PValueService implements IPValueService {
 				+ "where p.category.id = :categoryId\r\n");
 		
 		if (!includeDeleted) {
-			sqlStringBuilder.append("and where p.deletedAt is null\r\n");
+			sqlStringBuilder.append("and p.deletedAt is null\r\n");
 		}
 		
 		List<AttributeIdValueUnitTuple> tuples = dto.getAttributeIdValueUnitTuples();
@@ -310,7 +310,7 @@ public class PValueService implements IPValueService {
 		PValue value = valueOptional.get();
 		boolean delete = false;
 		
-		if (value.getDeletedAt() != null) {
+		if (value.getDeletedAt() == null) {
 			value.setDeletedAt(LocalDateTime.now());
 			delete = true;
 		}

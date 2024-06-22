@@ -19,11 +19,11 @@ public class Product extends BaseEntity {
     private String name;
 
     @JsonBackReference
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cate_id")
     private Category category;
 
     @JsonBackReference
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     List<PValue> values = new ArrayList<>();
 }

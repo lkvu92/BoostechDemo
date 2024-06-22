@@ -36,7 +36,7 @@ public class ProductService {
     }
 
     public Product getProductById(UUID id,boolean status) {
-        Product product = productRepository.findById(id).orElse(null);
+        Product product = productRepository.findByIdWithCategoryAndAttributes(id).orElse(null);
         if (product != null && (status && product.getDeletedAt() == null || !status && product.getDeletedAt() != null)) {
             return product;
         }
@@ -154,7 +154,7 @@ public class ProductService {
      * @return
      */
     public GetOneProductDto getOneProductDtos(UUID productId) {
-        Product product = productRepository.findById(productId).orElse(null);
+        Product product = productRepository.findByIdWithCategoryAndAttributes(productId).orElse(null);
         if (product == null) {
             return null;
         }
@@ -177,7 +177,7 @@ public class ProductService {
             attributeDto.setId(pValue.getAttribute().getId());
             attributeDto.setName(pValue.getAttribute().getAttributeName());
             attributeDto.setValue(pValue.getValue());
-
+            attributeDto.setUnit(pValue.getAttribute().getUnit().getUnitName());
             dto.getAttributes().add(attributeDto);
         }
         return dto;
@@ -186,7 +186,7 @@ public class ProductService {
      * Create product full version
      */
     @Transactional
-    public GetOneProductDto createProductWithAttributes(ProductCreateDto productCreateDto) {
+    public void createProductWithAttributes(ProductCreateDto productCreateDto) {
         //validate product name
         if (!productCreateDto.getName().isEmpty() && productRepository.existsByName(productCreateDto.getName())) {
             throw new IllegalArgumentException("Product name already exists");
@@ -216,20 +216,16 @@ public class ProductService {
             UUID attributeId = attributeValue.getAttributeId();
             Attribute attribute = listAttributeOfCateMap.get(attributeId);
             String value = attributeValue.getValue();
-            UUID unitId = attributeValue.getUnitId();
 
             AttributeValueUnitTuple attributeValueUnitTuple = new AttributeValueUnitTuple(attribute, value);
             attributeIdValueUnitTuples.add(attributeValueUnitTuple);
         }
 
         pValueService.createValueByProductIdAndAttributeIdValueUnitTuples(product, attributeIdValueUnitTuples);
-
-        GetOneProductDto productCustom = customResponse(product);
-        return productCustom;
     }
 
     @Transactional
-    public GetOneProductDto updateProductWithAttributes(ProductCreateDto productCreateDto, UUID productId) {
+    public void updateProductWithAttributes(ProductCreateDto productCreateDto, UUID productId) {
         Product product = productRepository.findById(productId).orElse(null);
         if (product == null) {
             throw new IllegalArgumentException("Product not found");
@@ -264,16 +260,12 @@ public class ProductService {
             UUID attributeId = attributeValue.getAttributeId();
             Attribute attribute = listAttributeOfCateMap.get(attributeId);
             String value = attributeValue.getValue();
-            UUID unitId = attributeValue.getUnitId();
 
-            AttributeValueUnitTuple attributeValueUnitTuple = new AttributeValueUnitTuple(attribute, value, unitId);
+            AttributeValueUnitTuple attributeValueUnitTuple = new AttributeValueUnitTuple(attribute, value);
             attributeIdValueUnitTuples.add(attributeValueUnitTuple);
         }
 
         pValueService.createValueByProductIdAndAttributeIdValueUnitTuples(product, attributeIdValueUnitTuples);
-
-        GetOneProductDto productCustom = customResponse(product);
-        return productCustom;
     }
 
     private Map<UUID, Attribute> CheckListAttribute(List<Attribute> listAttributeOfCate, List<AttributeValueDto> listAttributeOfProduct){
