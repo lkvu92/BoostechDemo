@@ -6,6 +6,7 @@ import com.boostech.demo.dto.reqDto.ProductCreateDto;
 import com.boostech.demo.entity.Product;
 import com.boostech.demo.service.ProductService;
 import com.boostech.demo.util.CustomResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,11 +14,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/products")
-public class ProductController {
-    @Autowired
-    private ProductService productService;
+public class ProductController extends BaseController{
+    private final ProductService productService;
 
     @GetMapping()
     public ResponseEntity<CustomResponse<List<Product>>> getAllProducts() {
@@ -25,7 +26,7 @@ public class ProductController {
     }
 
     @GetMapping("/advanced")
-    public CustomProductResponse<Product> getProductsAdvanced(
+    public CustomResponse<CustomProductResponse<Product>> getProductsAdvanced(
             @RequestParam(required = false) String name,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int limit,
@@ -33,7 +34,8 @@ public class ProductController {
             @RequestParam(defaultValue = "asc") String sortType,
             @RequestParam(defaultValue = "true") boolean status // true: active, false: all
     ) {
-        return productService.getProductsAdvanced(name, page, limit, sortBy, sortType, status);
+        CustomResponse customResponse = new CustomResponse("Success", 200, productService.getProductsAdvanced(name, page, limit, sortBy, sortType, status));
+        return customResponse;
     }
 
     @GetMapping("/{id}")
@@ -66,10 +68,8 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<CustomResponse<String>> deleteProduct(@PathVariable UUID id)  {
-        Product product = productService.deleteProduct(id);
-        if(product == null) {;
-            return new ResponseEntity<>(new CustomResponse<>("Product not found", 404, null), HttpStatus.NOT_FOUND);
-        }else if(product.getDeletedAt() != null){
+        boolean delete = productService.deleteProduct(id);
+      if(delete){
             return new ResponseEntity<>(new CustomResponse<>("Product deleted successfully", 200, null), HttpStatus.OK);
         }else{
             return new ResponseEntity<>(new CustomResponse<>("Product restored successfully", 200, null), HttpStatus.OK);
@@ -77,8 +77,9 @@ public class ProductController {
     }
 
     @GetMapping("/getoneproduct/{id}")
-    public GetOneProductDto getoneproduct(@PathVariable UUID id) {
-        return productService.getOneProductDtos(id);
+    public CustomResponse<GetOneProductDto> getoneproduct(@PathVariable UUID id) {
+        CustomResponse customResponse = new CustomResponse("Success", 200, productService.getOneProductDtos(id));
+        return customResponse;
     }
 
     @PostMapping()

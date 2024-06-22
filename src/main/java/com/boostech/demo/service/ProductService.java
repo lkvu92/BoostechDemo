@@ -7,6 +7,7 @@ import com.boostech.demo.entity.Attribute;
 import com.boostech.demo.entity.Category;
 import com.boostech.demo.entity.PValue;
 import com.boostech.demo.entity.Product;
+import com.boostech.demo.exception.ProductNotFoundException;
 import com.boostech.demo.repository.CategoryRepository;
 import com.boostech.demo.repository.IAttributeRepository;
 import com.boostech.demo.repository.PValueRepository;
@@ -72,19 +73,25 @@ public class ProductService {
         return productRepository.findProductsByCategory_Id(id);
     }
 
-    public Product deleteProduct(UUID id) {
-        Product product = productRepository.findById(id).orElse(null);
-        if (product == null) {
-            return null;
+    public boolean deleteProduct(UUID id) {
+        Optional<Product> productOptional = productRepository.findById(id);
+
+        if (productOptional.isEmpty()) {
+            throw new ProductNotFoundException(id);
         }
+
+        Product product = productOptional.get();
+
+        boolean delete = true;
         if(product.getDeletedAt() != null){
             product.setDeletedAt(null);
+            delete = false;
         }else {
             product.setDeletedAt(LocalDateTime.now());
         }
 
         productRepository.save(product);
-        return product;
+        return delete;
     }
 
     /**
@@ -156,7 +163,7 @@ public class ProductService {
     public GetOneProductDto getOneProductDtos(UUID productId) {
         Product product = productRepository.findByIdWithCategoryAndAttributes(productId).orElse(null);
         if (product == null) {
-            return null;
+            throw new ProductNotFoundException(productId);
         }
         GetOneProductDto dto = customResponse(product);
         return dto;
