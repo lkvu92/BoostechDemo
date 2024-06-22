@@ -1,7 +1,10 @@
 package com.boostech.demo.service;
 
+import com.boostech.demo.dto.AttributeIdValueUnitTuple;
+import com.boostech.demo.dto.FindAllProductByCategoryIdAndAttributeIdValueUnitTuplesDto;
 import com.boostech.demo.dto.reqDto.CategoryRequestDTO;
 import com.boostech.demo.dto.resDto.CategoryResponseDto;
+import com.boostech.demo.dto.resDto.FindAllProductByCategoryIdAndAttributeIdAndValueResponse;
 import com.boostech.demo.entity.Attribute;
 import com.boostech.demo.entity.Category;
 import com.boostech.demo.exception.attribute.AttributeAlreadyAddedException;
@@ -14,10 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class CategoryService {
@@ -25,13 +25,14 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final AttributeRepository attributeRepository;
     private final CategoryToCategoryResponseDtoConverter converter;
-
+    private final PValueService pValueService;
     private static final String CATEGORY_NOT_FOUND = "Category not found";
 
-    public CategoryService(CategoryRepository categoryRepository, AttributeRepository attributeRepository, CategoryToCategoryResponseDtoConverter converter) {
+    public CategoryService(CategoryRepository categoryRepository, AttributeRepository attributeRepository, CategoryToCategoryResponseDtoConverter converter, PValueService pValueService) {
         this.categoryRepository = categoryRepository;
         this.attributeRepository = attributeRepository;
         this.converter = converter;
+        this.pValueService = pValueService;
     }
 
     /**
@@ -133,7 +134,20 @@ public class CategoryService {
      */
     @Transactional
     public Category removeAttributesFromCategory(UUID categoryId, List<UUID> attributeIds) {
-        return modifyAttributesInCategory(categoryId, attributeIds, false);
+        Optional<Category> category = getCategoryById(categoryId);
+        if (category.isEmpty()) {
+            throw new CategoryNotFoundException(CATEGORY_NOT_FOUND);
+        }
+        for (UUID attributeId : attributeIds) {
+            FindAllProductByCategoryIdAndAttributeIdValueUnitTuplesDto dto = new FindAllProductByCategoryIdAndAttributeIdValueUnitTuplesDto();
+            dto.setCategoryId(categoryId);
+            dto.setAttributeIdValueUnitTuples(Collections.singletonList(new AttributeIdValueUnitTuple(attributeId, "%%")));
+            List<FindAllProductByCategoryIdAndAttributeIdAndValueResponse> products = pValueService.findAllProductByCategoryIdAndAttributeIdAndValue(dto, false);
+            if (products.isEmpty()) {
+                modifyAttributeInCategory(category.get(), attributeId, false);
+            }
+        }
+        return categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException(CATEGORY_NOT_FOUND));
     }
 
     /**

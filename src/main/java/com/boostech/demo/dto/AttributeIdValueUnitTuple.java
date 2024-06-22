@@ -8,7 +8,7 @@ public class AttributeIdValueUnitTuple {
 	 
 	 public AttributeIdValueUnitTuple() {}
 	 
-	 public AttributeIdValueUnitTuple(UUID id, String value, UUID unitId) {
+	 public AttributeIdValueUnitTuple(UUID id, String value) {
         this.id = id;
         this.value = value;
   

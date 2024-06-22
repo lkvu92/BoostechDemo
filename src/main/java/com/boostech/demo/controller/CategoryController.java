@@ -148,7 +148,7 @@ public class CategoryController {
      * @param categoryRequestDTO category data
      * @return category
      */
-    @PostMapping("/removeAttributes/{id}")
+    @DeleteMapping("/removeAttributes/{id}")
     public ResponseEntity<CustomResponse<Category>> removeAttributesFromCategory(
             @PathVariable UUID id,
             @RequestBody CategoryRequestDTO categoryRequestDTO) {
