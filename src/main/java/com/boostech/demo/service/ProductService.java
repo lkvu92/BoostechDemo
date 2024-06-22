@@ -177,7 +177,6 @@ public class ProductService {
             attributeDto.setId(pValue.getAttribute().getId());
             attributeDto.setName(pValue.getAttribute().getAttributeName());
             attributeDto.setValue(pValue.getValue());
-            attributeDto.setUnit(pValue.getUnit().getUnitName());
 
             dto.getAttributes().add(attributeDto);
         }
@@ -219,7 +218,7 @@ public class ProductService {
             String value = attributeValue.getValue();
             UUID unitId = attributeValue.getUnitId();
 
-            AttributeValueUnitTuple attributeValueUnitTuple = new AttributeValueUnitTuple(attribute, value, unitId);
+            AttributeValueUnitTuple attributeValueUnitTuple = new AttributeValueUnitTuple(attribute, value);
             attributeIdValueUnitTuples.add(attributeValueUnitTuple);
         }
 

@@ -13,5 +13,4 @@ public class UpdateValueByProductIdAndAttributeIdDto {
 	private String value;
 	private UUID attributeId;
 	private UUID productId;
-	private UUID unitId;
 }
