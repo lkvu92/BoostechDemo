@@ -1,4 +1,4 @@
-package com.boostech.demo.dto;
+package com.boostech.demo.dto.resDto;
 
 import lombok.Data;
 

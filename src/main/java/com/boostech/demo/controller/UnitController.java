@@ -21,6 +21,7 @@ import java.util.UUID;
 @RequestMapping("api/v1/units")
 public class UnitController {
     private final IUnitService unitService;
+    private static final String UNIT_NOT_FOUND = "Unit not found.";
 
     @GetMapping()
     public ResponseEntity<?> getAllUnits(){
@@ -35,7 +36,7 @@ public class UnitController {
             return ResponseEntity.ok().body(unit);
         }
         catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Unit not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(UNIT_NOT_FOUND);
         }
     }
 
@@ -49,7 +50,7 @@ public class UnitController {
            unitService.delete(id);
            return ResponseEntity.ok().body("Removed unit successfully.");
        }catch (EntityNotFoundException e) {
-           return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Unit not found.");
+           return ResponseEntity.status(HttpStatus.NOT_FOUND).body(UNIT_NOT_FOUND);
        }
     }
 
@@ -74,7 +75,7 @@ public class UnitController {
         ResponseEntity<?> existingUnit = getUnitDetail(id);
         try{
             if (existingUnit == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Unit not found.");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(UNIT_NOT_FOUND);
             }
 
             if (bindingResult.hasErrors()) {
@@ -85,7 +86,7 @@ public class UnitController {
             Unit unit = unitService.update(id, unitDto);
             return ResponseEntity.ok(unit);
         }catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Unit not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(UNIT_NOT_FOUND);
         }
     }
 }
