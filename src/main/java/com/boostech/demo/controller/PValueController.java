@@ -30,8 +30,6 @@ import com.boostech.demo.dto.resDto.FindPValueByIdResponse;
 import com.boostech.demo.dto.resDto.FindPValueByProductIdAndAttributeIdResponse;
 import com.boostech.demo.dto.resDto.FindPValuesByAttributeIdList;
 import com.boostech.demo.dto.resDto.FindPValuesByProductIdList;
-import com.boostech.demo.entity.PValue;
-import com.boostech.demo.entity.Product;
 import com.boostech.demo.exception.AttributeNotFoundException;
 import com.boostech.demo.exception.ErrorInfo;
 import com.boostech.demo.exception.PValueConflictException;
@@ -54,8 +52,8 @@ public class PValueController {
 	@GetMapping
 	public ResponseEntity<FindPValueByProductIdAndAttributeIdResponse> findByProductIdAndAttributeId( 
 			@RequestBody DeleteValueByProductIdAndAttributeIdDto request,
-			@RequestParam(name = "includeDeleted") boolean includeDeleted) {
-		FindPValueByProductIdAndAttributeIdResponse response = _pValueService.findByProductIdAndAttributeId(request);
+			@RequestParam(name = "includeDeleted", defaultValue = "false") boolean includeDeleted) {
+		FindPValueByProductIdAndAttributeIdResponse response = _pValueService.findByProductIdAndAttributeId(request, includeDeleted);
 		
 		return ResponseEntity.ok(response);
 	}
@@ -63,8 +61,8 @@ public class PValueController {
 	@GetMapping("{id}")
 	public ResponseEntity<FindPValueByIdResponse> findById(
 			@PathVariable UUID id,
-			@RequestParam(name = "includeDeleted") boolean includeDeleted) {
-		FindPValueByIdResponse response = _pValueService.findById(id);
+			@RequestParam(name = "includeDeleted", defaultValue = "false") boolean includeDeleted) {
+		FindPValueByIdResponse response = _pValueService.findById(id, includeDeleted);
 
 		return ResponseEntity.ok(response);
 	}
@@ -72,8 +70,8 @@ public class PValueController {
 	@GetMapping("attribute_id")
 	public ResponseEntity<List<FindPValuesByAttributeIdList>> findByAttributeIdList(
 			@RequestBody List<UUID> attributeIdList,
-			@RequestParam(name = "includeDeleted") boolean includeDeleted) {
-		List<FindPValuesByAttributeIdList> response = _pValueService.findAllByAttributeIdList(attributeIdList);
+			@RequestParam(name = "includeDeleted", defaultValue = "false") boolean includeDeleted) {
+		List<FindPValuesByAttributeIdList> response = _pValueService.findAllByAttributeIdList(attributeIdList, includeDeleted);
 		
 		return ResponseEntity.ok(response);
 	}
@@ -81,8 +79,8 @@ public class PValueController {
 	@GetMapping("product_id")
 	public ResponseEntity<List<FindPValuesByProductIdList>> findByProductIdList(
 			@RequestBody List<UUID> productIdList,
-			@RequestParam(name = "includeDeleted") boolean includeDeleted) {
-		List<FindPValuesByProductIdList> response = _pValueService.findAllByProductIdList(productIdList);
+			@RequestParam(name = "includeDeleted", defaultValue = "false") boolean includeDeleted) {
+		List<FindPValuesByProductIdList> response = _pValueService.findAllByProductIdList(productIdList, includeDeleted);
 		
 		return ResponseEntity.ok(response);
 	}
@@ -90,14 +88,15 @@ public class PValueController {
 	@GetMapping("products")
 	public ResponseEntity<List<FindAllProductByCategoryIdAndAttributeIdAndValueResponse>> findAllProductByCategoryIdAndAttributeIdValuePairs(
 			@RequestBody FindAllProductByCategoryIdAndAttributeIdValueUnitTuplesDto request,
-			@RequestParam(name = "includeDeleted", required = false) boolean includeDeleted) {
-		List<FindAllProductByCategoryIdAndAttributeIdAndValueResponse> response = _pValueService.findAllProductByCategoryIdAndAttributeIdAndValue(request);
+			@RequestParam(name = "includeDeleted", defaultValue = "false") boolean includeDeleted) {
+		List<FindAllProductByCategoryIdAndAttributeIdAndValueResponse> response = 
+				_pValueService.findAllProductByCategoryIdAndAttributeIdAndValue(request, includeDeleted);
 		
 		return ResponseEntity.ok(response);	
 	}
 	
 	@PostMapping
-	public ResponseEntity<?> createValueById(
+	public ResponseEntity<Void> createValueById(
 			@RequestBody 
 			CreateValueByIdDto request) {
 		_pValueService.createValueById(request);
@@ -107,7 +106,7 @@ public class PValueController {
 	}
 	
 	@PatchMapping("{id}")
-	public ResponseEntity<?> updateValueById(
+	public ResponseEntity<Void> updateValueById(
 			@PathVariable UUID id,
 			@RequestBody 
 			UpdateValueByIdDto request) {
@@ -120,7 +119,7 @@ public class PValueController {
 	}
 	
 	@DeleteMapping("{id}")
-	public ResponseEntity<?> deleteValueById(
+	public ResponseEntity<Void> deleteValueById(
 			@PathVariable UUID id) {
 		boolean delete = _pValueService.deleteValueById(id);
 		
@@ -129,7 +128,7 @@ public class PValueController {
 	}
 	
 	@DeleteMapping
-	public ResponseEntity<?> deleteValueById(
+	public ResponseEntity<Void> deleteValueById(
 			@RequestBody DeleteValueByProductIdAndAttributeIdDto request) {
 		boolean delete = _pValueService.deleteValueByProductIdAndAttributeId(request);
 		

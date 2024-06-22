@@ -171,13 +171,12 @@ public class ProductService {
         categoryDto.setName(product.getCategory().getName());
         dto.setCategory(categoryDto);
 
-        List<PValue> listPValue = pValueRepository.findAllByProductIdIn(List.of(product.getId()));
+        List<PValue> listPValue = pValueRepository.findAllByProductIdIn(List.of(product.getId()), false);
         for (PValue pValue : listPValue) {
             GetOneProductDto.AttributeDto attributeDto = new GetOneProductDto.AttributeDto();
             attributeDto.setId(pValue.getAttribute().getId());
             attributeDto.setName(pValue.getAttribute().getAttributeName());
             attributeDto.setValue(pValue.getValue());
-            attributeDto.setUnit(pValue.getUnit().getUnitName());
 
             dto.getAttributes().add(attributeDto);
         }
@@ -219,7 +218,7 @@ public class ProductService {
             String value = attributeValue.getValue();
             UUID unitId = attributeValue.getUnitId();
 
-            AttributeValueUnitTuple attributeValueUnitTuple = new AttributeValueUnitTuple(attribute, value, unitId);
+            AttributeValueUnitTuple attributeValueUnitTuple = new AttributeValueUnitTuple(attribute, value);
             attributeIdValueUnitTuples.add(attributeValueUnitTuple);
         }
 

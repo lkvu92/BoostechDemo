@@ -14,5 +14,4 @@ public class UpdateValueByIdDto {
 	private String value;
 	private UUID attributeId;
 	private UUID productId;
-	private UUID unitId;
 }

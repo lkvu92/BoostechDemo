@@ -13,5 +13,4 @@ import java.util.UUID;
 public class AttributeValueUnitTuple {
     private Attribute attribute;
     private String value;
-    private UUID unitId;
 }

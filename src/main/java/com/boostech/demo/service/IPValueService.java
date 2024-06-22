@@ -12,18 +12,19 @@ import com.boostech.demo.dto.resDto.FindPValuesByProductIdList;
 import com.boostech.demo.entity.Product;
 
 public interface IPValueService {
-	FindPValueByIdResponse findById(UUID id);
-	FindPValueByProductIdAndAttributeIdResponse findByProductIdAndAttributeId(DeleteValueByProductIdAndAttributeIdDto dto);
+	FindPValueByIdResponse findById(UUID id, boolean includeDeleted);
+	FindPValueByProductIdAndAttributeIdResponse findByProductIdAndAttributeId(
+			DeleteValueByProductIdAndAttributeIdDto dto, 
+			boolean includeDeleted
+	);
 	
-//	PValue findByAttributeId(UUID attributeId);
-//	
-//	PValue findByProductId(UUID productId);
+	List<FindPValuesByAttributeIdList> findAllByAttributeIdList(List<UUID> attributeIdList, boolean includeDeleted);
 	
-	List<FindPValuesByAttributeIdList> findAllByAttributeIdList(List<UUID> attributeIdList);
+	List<FindPValuesByProductIdList> findAllByProductIdList(List<UUID> productIdList, boolean includeDeleted);
 	
-	List<FindPValuesByProductIdList> findAllByProductIdList(List<UUID> productIdList);
-	
-	List<FindAllProductByCategoryIdAndAttributeIdAndValueResponse> findAllProductByCategoryIdAndAttributeIdAndValue(FindAllProductByCategoryIdAndAttributeIdValueUnitTuplesDto dto);
+	List<FindAllProductByCategoryIdAndAttributeIdAndValueResponse> findAllProductByCategoryIdAndAttributeIdAndValue(
+			FindAllProductByCategoryIdAndAttributeIdValueUnitTuplesDto dto, boolean includeDeleted
+	);
 
 	void createValueById(CreateValueByIdDto dto);
 	
