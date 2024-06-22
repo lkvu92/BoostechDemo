@@ -154,6 +154,7 @@ public class PValueService implements IPValueService {
 		if (n > 0) {
 			sqlStringBuilder.append(String.format("having count(distinct (v.attribute.id, v.value, v.unit.id)) = %d", n));
 		}
+
 		String sql = sqlStringBuilder.toString();
 	    TypedQuery<Product> query = _entityManager.createQuery(sqlStringBuilder.toString(), Product.class);
 	    query.setParameter("categoryId", dto.getCategoryId());
