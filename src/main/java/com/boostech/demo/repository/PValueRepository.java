@@ -16,7 +16,10 @@ public interface PValueRepository extends JpaRepository<PValue, UUID> {
 //	Optional<PValue> findByValueId_AttributeId(UUID attributeId);
 	boolean existsByProductIdAndAttributeId(UUID productId, UUID attributeId);
 	
-	@Query("select v from PValue v where v.attribute.id = :attributeId and v.product.id = :productId and (:includeDeleted = true or v.deletedAt is null)")
+	@Query("select v from PValue v "
+			+ "where v.attribute.id = :attributeId "
+			+ "and v.product.id = :productId "
+			+ "and (:includeDeleted = true or v.deletedAt is null)")
 	Optional<PValue> findByProductIdAndAttributeId(
 			@Param(value = "productId") 
 			UUID productId,
@@ -26,7 +29,10 @@ public interface PValueRepository extends JpaRepository<PValue, UUID> {
 			boolean includeDeleted
 	);
 	
-	@Query("select v from PValue v join fetch v.product where v.attribute.id in :attributeIdList and (:includeDeleted = true or v.deletedAt is null)")
+	@Query("select v from PValue v join fetch v.product p "
+			+ "where v.attribute.id in :attributeIdList "
+			+ "and (:includeDeleted = true "
+			+ "or v.deletedAt is null)")
 	List<PValue> findAllByAttributeIdIn	(
 			@Param(value = "attributeIdList") 
 			List<UUID> attributeIdList, 
@@ -34,14 +40,32 @@ public interface PValueRepository extends JpaRepository<PValue, UUID> {
 			boolean includeDeleted
 	);
 	
-	@Query("select v from PValue v join fetch v.attribute where v.product.id in :productIdList and (:includeDeleted = true or v.deletedAt is null)")
+	@Query("select v from PValue v join fetch v.attribute "
+			+ "where v.product.id in :productIdList "
+			+ "and (:includeDeleted = true or v.deletedAt is null)")
 	List<PValue> findAllByProductIdIn(
 			@Param(value = "productIdList") 
 			List<UUID> productIdList,
 			@Param("includeDeleted") 
 			boolean includeDeleted);
 	
-	Optional<PValue> findByIdAndDeletedAtIsNull(UUID id);
+	@Query("select v from PValue v "
+			+ "where v.id = :id "
+			+ "and (:includeDeleted = true or v.deletedAt is null)")
+	Optional<PValue> findById(
+			@Param(value = "id") 
+			UUID id,
+			@Param("includeDeleted") 
+			boolean includeDeleted);
+	
+	@Query("select v from PValue v "
+			+ "join fetch v.product p join fetch v.attribute a "
+			+ "where v.id = :id "
+			+ "and (:includeDeleted = true or v.deletedAt is null)")
+	Optional<PValue> findByIdWithProductAndAttribute(
+			@Param(value = "id") UUID id, 
+			@Param("includeDeleted") 
+			boolean includeDeleted);
 	
 //	@Procedure(procedureName = "FILTER_PRODUCT")
 //	void filterProduct(Map<String, String> map);

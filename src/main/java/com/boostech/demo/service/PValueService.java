@@ -41,15 +41,8 @@ public class PValueService implements IPValueService {
 
 	@Override
 	public FindPValueByIdResponse findById(UUID id, boolean includeDeleted) {
-		Optional<PValue> pValueOptional = Optional.empty();
+		Optional<PValue> pValueOptional = _pValueRepository.findByIdWithProductAndAttribute(id, includeDeleted);
 
-		if (includeDeleted) {
-			pValueOptional = _pValueRepository.findById(id);
-		}
-		else {
-			pValueOptional = _pValueRepository.findByIdAndDeletedAtIsNull(id);
-		}
-		
 		if (pValueOptional.isEmpty()) {
 			throw new PValueNotFoundException(id);
 		}
