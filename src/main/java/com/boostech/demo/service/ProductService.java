@@ -171,7 +171,7 @@ public class ProductService {
         categoryDto.setName(product.getCategory().getName());
         dto.setCategory(categoryDto);
 
-        List<PValue> listPValue = pValueRepository.findAllByProductIdIn(List.of(product.getId()));
+        List<PValue> listPValue = pValueRepository.findAllByProductIdIn(List.of(product.getId()), false);
         for (PValue pValue : listPValue) {
             GetOneProductDto.AttributeDto attributeDto = new GetOneProductDto.AttributeDto();
             attributeDto.setId(pValue.getAttribute().getId());

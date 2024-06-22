@@ -71,14 +71,7 @@ public class PValueService implements IPValueService {
 			boolean includeDeleted
 	) {
 		UUID productId = dto.getProductId(), attributeId = dto.getAttributeId();
-		Optional<PValue> pValueOptional = Optional.empty();
-		
-		if (includeDeleted) {
-			pValueOptional = _pValueRepository.findByProductIdAndAttributeId(productId, attributeId);
-		}
-		else {
-			pValueOptional = _pValueRepository.findByProductIdAndAttributeIdAndDeletedAtIsNull(productId, attributeId);
-		}
+		Optional<PValue> pValueOptional = _pValueRepository.findByProductIdAndAttributeId(productId, attributeId, includeDeleted);
 		
 		if (pValueOptional.isEmpty()) {
 			throw new PValueNotFoundException(attributeId, productId);
@@ -99,14 +92,7 @@ public class PValueService implements IPValueService {
 			List<UUID> attributeIdList,
 			boolean includeDeleted
 	) {
-		List<PValue> pValues = List.of();
-		
-		if (includeDeleted) {
-			pValues = _pValueRepository.findAllByAttributeIdIn(attributeIdList);
-		}
-		else {
-			pValues = _pValueRepository.findAllByDeletedAtIsNullAndAttributeIdIn(attributeIdList);
-		}
+		List<PValue> pValues = _pValueRepository.findAllByAttributeIdIn(attributeIdList, includeDeleted);
 		
 		List<FindPValuesByAttributeIdList> response = pValues.stream().map(pValue -> {
 			FindPValuesByAttributeIdList findPValuesByAttributeIdList = new FindPValuesByAttributeIdList();
@@ -125,15 +111,8 @@ public class PValueService implements IPValueService {
 			List<UUID> productIdList,
 			boolean includeDeleted
 	) {
-		List<PValue> pValues = List.of();
-		
-		if (includeDeleted) {
-			pValues = _pValueRepository.findAllByProductIdIn(productIdList);
-		}
-		else {
-			pValues = _pValueRepository.findAllByDeletedAtIsNullAndProductIdIn(productIdList);
-		}
-		
+		List<PValue> pValues = _pValueRepository.findAllByProductIdIn(productIdList, includeDeleted);
+
 		List<FindPValuesByProductIdList> response = pValues.stream().map(pValue -> {
 			FindPValuesByProductIdList findPValuesByProductIdList = new FindPValuesByProductIdList();
 			findPValuesByProductIdList.setId(pValue.getId());
@@ -283,7 +262,7 @@ public class PValueService implements IPValueService {
 	@Override
 	public void updateValueByProductIdAndAttributeId(UpdateValueByProductIdAndAttributeIdDto dto) {
 		UUID productId = dto.getProductId(), attributeId = dto.getAttributeId();
-		Optional<PValue> valueOptional = _pValueRepository.findByProductIdAndAttributeId(productId,  attributeId);
+		Optional<PValue> valueOptional = _pValueRepository.findByProductIdAndAttributeId(productId,  attributeId, false);
 		
 		if (valueOptional.isEmpty()) {
 			throw new PValueNotFoundException(attributeId, productId);
@@ -294,7 +273,6 @@ public class PValueService implements IPValueService {
 		value.setValue(dto.getValue());
 		
 		_pValueRepository.save(value);
-		
 	}
 
 	@Override
@@ -324,7 +302,7 @@ public class PValueService implements IPValueService {
 	@Override
 	public boolean deleteValueByProductIdAndAttributeId(DeleteValueByProductIdAndAttributeIdDto dto) {
 		UUID productId = dto.getProductId(), attributeId = dto.getAttributeId();
-		Optional<PValue> valueOptional = _pValueRepository.findByProductIdAndAttributeId(productId, attributeId);
+		Optional<PValue> valueOptional = _pValueRepository.findByProductIdAndAttributeId(productId, attributeId, true);
 		
 		if (valueOptional.isEmpty()) {
 			throw new PValueNotFoundException(attributeId, productId);
