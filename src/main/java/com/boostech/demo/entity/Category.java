@@ -19,7 +19,7 @@ import java.util.List;
 public class Category extends BaseEntity {
     private String name;
     @JsonManagedReference
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "category_attribute",
             joinColumns = @JoinColumn(name = "category_id"),

@@ -55,8 +55,8 @@ public class ProductController {
         return new ResponseEntity<CustomResponse<Product>>(new CustomResponse<>("Product created successfully", 201, product), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<CustomResponse<Product>> updateProduct(@PathVariable UUID id, @RequestBody ProductCreateDto productCreateDto)  {
+    @PutMapping("/post_v1/{id}")
+    public ResponseEntity<CustomResponse<Product>> updateProductV1(@PathVariable UUID id, @RequestBody ProductCreateDto productCreateDto)  {
         Product product = productService.updateProduct(id, productCreateDto);
         if(product == null) {
             return new ResponseEntity<>(new CustomResponse<>("Product not found", 404, null), HttpStatus.NOT_FOUND);
@@ -82,12 +82,18 @@ public class ProductController {
     }
 
     @PostMapping()
-    public ResponseEntity<CustomResponse<GetOneProductDto>> saveProduct(@RequestBody ProductCreateDto productCreateDto)  {
-        GetOneProductDto product = productService.createProductFullVersion(productCreateDto);
+    public ResponseEntity<CustomResponse<Void>> saveProduct(@RequestBody ProductCreateDto productCreateDto)  {
+        productService.createProductWithAttributes(productCreateDto);
 //        if(product == null) {
 //            return new ResponseEntity<>(new CustomResponse<>("Product fail!", 400, null), HttpStatus.BAD_REQUEST);
 //        }
-        return new ResponseEntity<CustomResponse<GetOneProductDto>>(new CustomResponse<>("Product created successfully", 201, product), HttpStatus.CREATED);
+        return new ResponseEntity<>(new CustomResponse<>("Product created successfully", 201, null), HttpStatus.CREATED);
+    }
+    @PutMapping("/{id}")
+    public ResponseEntity<CustomResponse<Void>> updateProduct(@PathVariable UUID id, @RequestBody ProductCreateDto productCreateDto)  {
+        productService.updateProductWithAttributes(productCreateDto, id);
+
+        return new ResponseEntity<>(new CustomResponse<>("Product updated successfully", 200, null), HttpStatus.OK);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

@@ -1,5 +1,6 @@
 package com.boostech.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,10 +18,12 @@ public class Product extends BaseEntity {
     @Column(name = "name", length = 255)
     private String name;
 
-    @ManyToOne
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cate_id")
     private Category category;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonBackReference
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     List<PValue> values = new ArrayList<>();
 }
