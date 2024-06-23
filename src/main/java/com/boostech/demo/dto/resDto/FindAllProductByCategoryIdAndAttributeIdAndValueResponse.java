@@ -1,4 +1,4 @@
-package com.boostech.demo.dto;
+package com.boostech.demo.dto.resDto;
 
 import java.util.UUID;
 
@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateValueByIdDto {
-	private UUID productId;
-	private UUID attributeId;
-	private String value;
+public class FindAllProductByCategoryIdAndAttributeIdAndValueResponse {
+	private UUID id;
+	private String name;
 }

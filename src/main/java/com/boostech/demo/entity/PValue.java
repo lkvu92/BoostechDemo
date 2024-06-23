@@ -13,17 +13,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PValue extends BaseEntity {
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "product_id")
 	private Product product;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "attribute_id")
 	private Attribute attribute;
 	
     @Column(name = "value")
 	private String value;
-
-	@ManyToOne()
-	private Unit unit;
 }

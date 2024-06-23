@@ -27,6 +27,9 @@ public class Attribute extends BaseEntity {
     @ManyToMany(mappedBy = "attributes")
     private List<Category> categories = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "attributes", cascade = CascadeType.ALL)
-    private List<Unit> units = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Unit unit;
+
+    @OneToMany(mappedBy = "attribute")
+    List<PValue> values = new ArrayList<>();
 }

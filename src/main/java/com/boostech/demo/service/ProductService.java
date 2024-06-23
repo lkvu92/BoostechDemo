@@ -7,6 +7,7 @@ import com.boostech.demo.entity.Attribute;
 import com.boostech.demo.entity.Category;
 import com.boostech.demo.entity.PValue;
 import com.boostech.demo.entity.Product;
+import com.boostech.demo.exception.ProductNotFoundException;
 import com.boostech.demo.repository.CategoryRepository;
 import com.boostech.demo.repository.IAttributeRepository;
 import com.boostech.demo.repository.PValueRepository;
@@ -36,7 +37,7 @@ public class ProductService {
     }
 
     public Product getProductById(UUID id,boolean status) {
-        Product product = productRepository.findById(id).orElse(null);
+        Product product = productRepository.findByIdWithCategoryAndAttributes(id).orElse(null);
         if (product != null && (status && product.getDeletedAt() == null || !status && product.getDeletedAt() != null)) {
             return product;
         }
@@ -72,19 +73,25 @@ public class ProductService {
         return productRepository.findProductsByCategory_Id(id);
     }
 
-    public Product deleteProduct(UUID id) {
-        Product product = productRepository.findById(id).orElse(null);
-        if (product == null) {
-            return null;
+    public boolean deleteProduct(UUID id) {
+        Optional<Product> productOptional = productRepository.findById(id);
+
+        if (productOptional.isEmpty()) {
+            throw new ProductNotFoundException(id);
         }
+
+        Product product = productOptional.get();
+
+        boolean delete = true;
         if(product.getDeletedAt() != null){
             product.setDeletedAt(null);
+            delete = false;
         }else {
             product.setDeletedAt(LocalDateTime.now());
         }
 
         productRepository.save(product);
-        return product;
+        return delete;
     }
 
     /**
@@ -145,7 +152,7 @@ public class ProductService {
      * @return URL for the next or previous page
      */
     private String constructPageUrl(Pageable pageable) {
-        return "/api/products?page=" + pageable.getPageNumber() + "&size=" + pageable.getPageSize();
+        return " /api/v1/products/advanced?page=" + pageable.getPageNumber() + "&limit=" + pageable.getPageSize();
     }
 
     /**
@@ -154,9 +161,9 @@ public class ProductService {
      * @return
      */
     public GetOneProductDto getOneProductDtos(UUID productId) {
-        Product product = productRepository.findById(productId).orElse(null);
+        Product product = productRepository.findByIdWithCategoryAndAttributes(productId).orElse(null);
         if (product == null) {
-            return null;
+            throw new ProductNotFoundException(productId);
         }
         GetOneProductDto dto = customResponse(product);
         return dto;
@@ -171,14 +178,13 @@ public class ProductService {
         categoryDto.setName(product.getCategory().getName());
         dto.setCategory(categoryDto);
 
-        List<PValue> listPValue = pValueRepository.findAllByProductIdIn(List.of(product.getId()));
+        List<PValue> listPValue = pValueRepository.findAllByProductIdIn(List.of(product.getId()), false);
         for (PValue pValue : listPValue) {
             GetOneProductDto.AttributeDto attributeDto = new GetOneProductDto.AttributeDto();
             attributeDto.setId(pValue.getAttribute().getId());
             attributeDto.setName(pValue.getAttribute().getAttributeName());
             attributeDto.setValue(pValue.getValue());
-            attributeDto.setUnit(pValue.getUnit().getUnitName());
-
+            attributeDto.setUnit(pValue.getAttribute().getUnit().getUnitName());
             dto.getAttributes().add(attributeDto);
         }
         return dto;
@@ -187,7 +193,7 @@ public class ProductService {
      * Create product full version
      */
     @Transactional
-    public GetOneProductDto createProductFullVersion(ProductCreateDto productCreateDto) {
+    public void createProductWithAttributes(ProductCreateDto productCreateDto) {
         //validate product name
         if (!productCreateDto.getName().isEmpty() && productRepository.existsByName(productCreateDto.getName())) {
             throw new IllegalArgumentException("Product name already exists");
@@ -217,21 +223,56 @@ public class ProductService {
             UUID attributeId = attributeValue.getAttributeId();
             Attribute attribute = listAttributeOfCateMap.get(attributeId);
             String value = attributeValue.getValue();
-            UUID unitId = attributeValue.getUnitId();
 
-            AttributeValueUnitTuple attributeValueUnitTuple = new AttributeValueUnitTuple(attribute, value, unitId);
+            AttributeValueUnitTuple attributeValueUnitTuple = new AttributeValueUnitTuple(attribute, value);
             attributeIdValueUnitTuples.add(attributeValueUnitTuple);
         }
 
         pValueService.createValueByProductIdAndAttributeIdValueUnitTuples(product, attributeIdValueUnitTuples);
-
-        GetOneProductDto productCustom = customResponse(product);
-        return productCustom;
     }
 
     @Transactional
-    public GetOneProductDto updateProductFullVersion(ProductCreateDto productCreateDto) {
-        return null;
+    public void updateProductWithAttributes(ProductCreateDto productCreateDto, UUID productId) {
+        Product product = productRepository.findById(productId).orElse(null);
+        if (product == null) {
+            throw new IllegalArgumentException("Product not found");
+        }
+        if (!productCreateDto.getName().isEmpty()
+                && productRepository.existsByName(productCreateDto.getName())
+                && productCreateDto.getName().equals(product.getName())
+        ) {
+            throw new IllegalArgumentException("Product name already exists");
+        }
+        //input Product, List<Attribute>
+        Optional<Category> categoryOptional = categoryRepository.findById(productCreateDto.getCate_id());
+        if (categoryOptional.isEmpty()) {
+            throw new IllegalArgumentException("Category not found");
+        }
+        Category category = categoryOptional.get();
+        List<Attribute> attributes = category.getAttributes();
+        //Check list attr isqual list attr in cate , if not return null
+
+        Map<UUID, Attribute> listAttributeOfCateMap = CheckListAttribute(attributes, productCreateDto.getAttributeValues());
+        if(listAttributeOfCateMap == null){
+            throw new IllegalArgumentException("Product's attributes are not valid");
+        }
+        //Update product
+        Optional<Category> cate = categoryRepository.findById(productCreateDto.getCate_id());
+        product.setName(productCreateDto.getName());
+        product.setCategory(cate.get());
+        productRepository.save(product);
+        //Create list value
+        List<AttributeValueUnitTuple>  attributeIdValueUnitTuples = new ArrayList<>();
+        for (AttributeValueDto attributeValue : productCreateDto.getAttributeValues()) {
+            UUID attributeId = attributeValue.getAttributeId();
+            Attribute attribute = listAttributeOfCateMap.get(attributeId);
+            String value = attributeValue.getValue();
+
+            AttributeValueUnitTuple attributeValueUnitTuple = new AttributeValueUnitTuple(attribute, value);
+            attributeIdValueUnitTuples.add(attributeValueUnitTuple);
+        }
+
+        pValueService.createValueByProductIdAndAttributeIdValueUnitTuples(product, attributeIdValueUnitTuples);
     }
 
     private Map<UUID, Attribute> CheckListAttribute(List<Attribute> listAttributeOfCate, List<AttributeValueDto> listAttributeOfProduct){

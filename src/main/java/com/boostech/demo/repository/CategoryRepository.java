@@ -13,6 +13,9 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
     @EntityGraph(attributePaths = {"attributes"})
     Optional<Category> findById(UUID id);
 
+    @Query("SELECT c FROM Category c WHERE c.id = :id AND c.deletedAt IS NULL")
+    Optional<Category> getOneWithoutAttributes(UUID id);
+
     @Query("SELECT c FROM Category c WHERE c.deletedAt IS NULL")
     List<Category> findAll();
 }
