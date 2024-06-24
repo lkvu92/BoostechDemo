@@ -1,7 +1,7 @@
 package com.boostech.demo.controller;
 
-import com.boostech.demo.dto.reqDto.CategoryRequestDTO;
-import com.boostech.demo.dto.resDto.CategoryResponseDto;
+import com.boostech.demo.dto.reqDto.category.CategoryRequestDTO;
+import com.boostech.demo.dto.resDto.category.GetAllCategoryResponseDto;
 import com.boostech.demo.entity.Category;
 import com.boostech.demo.service.CategoryService;
 import com.boostech.demo.util.CustomResponse;
@@ -23,11 +23,11 @@ class CategoryControllerTest {
 
     @Test
     void testGetAllCategories() {
-        CategoryResponseDto dto = new CategoryResponseDto();
+        GetAllCategoryResponseDto dto = new GetAllCategoryResponseDto();
         dto.setId(UUID.randomUUID());
         when(categoryService.getAllCategories()).thenReturn(Arrays.asList(dto));
 
-        ResponseEntity<CustomResponse<List<CategoryResponseDto>>> response = categoryController.getAllCategories();
+        ResponseEntity<CustomResponse<List<GetAllCategoryResponseDto>>> response = categoryController.getAllCategories();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(dto, Objects.requireNonNull(response.getBody()).getData().get(0));
@@ -103,11 +103,11 @@ class CategoryControllerTest {
     @Test
     void testGetOneCategoryWithoutAttributes() {
         UUID id = UUID.randomUUID();
-        CategoryResponseDto dto = new CategoryResponseDto();
+        GetAllCategoryResponseDto dto = new GetAllCategoryResponseDto();
         dto.setId(id);
         when(categoryService.getOneCategoryWithoutAttributes(id)).thenReturn(Optional.of(dto));
 
-        ResponseEntity<CustomResponse<CategoryResponseDto>> response = categoryController.getOneCategoryWithoutAttributes(id);
+        ResponseEntity<CustomResponse<GetAllCategoryResponseDto>> response = categoryController.getOneCategoryWithoutAttributes(id);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(dto, Objects.requireNonNull(response.getBody()).getData());

@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface CategoryRepository extends JpaRepository<Category, UUID> {
-    @EntityGraph(attributePaths = {"attributes"})
+//    @EntityGraph(attributePaths = {"categoryAttributes.attribute"})
     Optional<Category> findById(UUID id);
 
     @Query("SELECT c FROM Category c WHERE c.id = :id AND c.deletedAt IS NULL")
