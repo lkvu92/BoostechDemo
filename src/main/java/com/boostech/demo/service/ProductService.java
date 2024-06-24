@@ -224,7 +224,7 @@ public class ProductService {
             Attribute attribute = listAttributeOfCateMap.get(attributeId);
             String value = attributeValue.getValue();
 
-            AttributeValueUnitTuple attributeValueUnitTuple = new AttributeValueUnitTuple(attribute, value);
+            AttributeValueUnitTuple attributeValueUnitTuple = new AttributeValueUnitTuple(attribute, value, category);
             attributeIdValueUnitTuples.add(attributeValueUnitTuple);
         }
 
@@ -268,7 +268,7 @@ public class ProductService {
             Attribute attribute = listAttributeOfCateMap.get(attributeId);
             String value = attributeValue.getValue();
 
-            AttributeValueUnitTuple attributeValueUnitTuple = new AttributeValueUnitTuple(attribute, value);
+            AttributeValueUnitTuple attributeValueUnitTuple = new AttributeValueUnitTuple(attribute, value, category);
             attributeIdValueUnitTuples.add(attributeValueUnitTuple);
         }
 
