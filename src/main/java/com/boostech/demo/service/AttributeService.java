@@ -25,11 +25,7 @@ public class AttributeService implements IAttributeService {
     private IUnitRepository unitRepository;
 
     public List<Attribute> getAll() {
-        try{
-            return repository.findAll();
-        }catch (EntityNotFoundException e){
-            throw new EntityNotFoundException(e.getMessage());
-        }
+        return repository.findAll();
     }
 
     public Attribute getById(UUID id) {

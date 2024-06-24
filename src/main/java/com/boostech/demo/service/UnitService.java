@@ -18,11 +18,7 @@ public class UnitService implements IUnitService {
     private final IUnitRepository repository;
 
     public List<Unit> getAll() {
-        try{
-            return repository.findAll();
-        }catch (EntityNotFoundException e){
-            throw new EntityNotFoundException(e.getMessage());
-        }
+        return repository.findAll();
     }
 
     public Unit getById(UUID id) {
