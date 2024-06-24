@@ -45,13 +45,13 @@ public class UnitService implements IUnitService {
 
     public Unit update(UUID id, UnitDto unitDto) {
        try {
-           Unit existingUnit = getById(id);
-           if (existingUnit == null) {
-               throw new EntityNotFoundException("Unit with id " + id + " not found");
-           }
+           Unit existingUnit = repository.findById(id)
+                   .orElseThrow(() -> new EntityNotFoundException("Unit with id " + id + " not found"));
 
-           if(existingUnit.getUnitName().equals(unitDto.getUnitName())) {
+           if(existingUnit.getUnitName().equals(unitDto.getUnitName())){
                existingUnit.setUnitName(existingUnit.getUnitName());
+           }else{
+               existingUnit.setUnitName(unitDto.getUnitName());
            }
 
            existingUnit.setUnitType(unitDto.getUnitType());
@@ -64,12 +64,8 @@ public class UnitService implements IUnitService {
     }
 
     public void delete(UUID id) {
-        Unit existingUnit = getById(id);
-        if (existingUnit == null) {
-            throw new EntityNotFoundException("Unit with id " + id + " not found");
-        }
-
-        existingUnit.setDeletedAt(LocalDateTime.now());
+        Unit existingUnit = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Unit with id " + id + " not found"));
         repository.delete(existingUnit);
     }
 }

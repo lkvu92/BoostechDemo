@@ -1,13 +1,15 @@
 package com.boostech.demo.seeder;
 
 import com.boostech.demo.entity.Attribute;
+import com.boostech.demo.entity.Unit;
 import com.boostech.demo.repository.AttributeRepository;
+import com.boostech.demo.repository.IUnitRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,10 +19,14 @@ import java.util.UUID;
 
 public class AttributeSeeder {
     private final AttributeRepository repository;
+    private final IUnitRepository unitRepository;
 
     @Bean // This method creates a Spring bean that executes the seed logic
     public List<Attribute> seedAttributes() {
-        if(repository.findAll().isEmpty()){
+
+        List<Attribute> attributes = repository.findAll();
+
+        if(attributes.isEmpty()){
             Attribute length = new Attribute();
             length.setId(UUID.randomUUID());
             length.setAttributeName("Length");

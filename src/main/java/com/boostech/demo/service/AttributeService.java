@@ -43,7 +43,8 @@ public class AttributeService implements IAttributeService {
             attribute.setAttributeName(attributeDto.getAttributeName());
             attribute.setActive(true);
 
-            Unit unit = unitRepository.findById(attributeDto.getUnitId()).orElseThrow();
+            Unit unit = unitRepository.findById(attributeDto.getUnitId())
+                    .orElseThrow(() -> new EntityNotFoundException("Unit not found."));
             attribute.setUnit(unit);
 
             return repository.save(attribute);
@@ -54,14 +55,18 @@ public class AttributeService implements IAttributeService {
 
     public Attribute update(UUID id, AttributeDto attributeDto) {
         try {
-            Attribute existingAttribute = getById(id);
-            if(existingAttribute == null){
-                throw new EntityNotFoundException("Attribute not found.");
+            Attribute existingAttribute = repository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("Attribute not found."));
+
+            if(existingAttribute.getAttributeName().equals(attributeDto.getAttributeName())){
+                existingAttribute.setAttributeName(existingAttribute.getAttributeName());
+            }else{
+                existingAttribute.setAttributeName(attributeDto.getAttributeName());
             }
 
-            existingAttribute.setAttributeName(attributeDto.getAttributeName());
             existingAttribute.setActive(true);
-            Unit unit = unitRepository.findById(attributeDto.getUnitId()).orElseThrow();
+            Unit unit = unitRepository.findById(attributeDto.getUnitId())
+                    .orElseThrow(() -> new EntityNotFoundException("Unit not found."));
 
             existingAttribute.setUnit(unit);
             return repository.save(existingAttribute);
@@ -72,10 +77,8 @@ public class AttributeService implements IAttributeService {
     }
 
     public void delete(UUID id) {
-        Attribute existingAttribute = getById(id);
-        if(existingAttribute == null) {
-            throw new EntityNotFoundException("Attribute not found.");
-        }
+        Attribute existingAttribute = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Attribute not found."));
 
         existingAttribute.setActive(false);
         existingAttribute.setDeletedAt(LocalDateTime.now());

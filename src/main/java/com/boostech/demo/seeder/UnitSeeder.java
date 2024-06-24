@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,22 +21,24 @@ public class UnitSeeder {
     @Bean // This method creates a Spring bean that executes the seed logic
     public List<Unit> seedUnits() throws Exception {
         // Check if any units already exist (optional)
-        if (repository.findAll().isEmpty()) {
+        List<Unit> units = repository.findAll();
+
+        if (units.isEmpty()) {
             // Create sample Unit objects
             Unit length = new Unit();
             length.setId(UUID.randomUUID());
-            length.setUnitName("mm");
-            length.setUnitType("length");
+            length.setUnitName("millimetre");
+            length.setUnitType("mm");
 
             Unit weight = new Unit();
             weight.setId(UUID.randomUUID());
             weight.setUnitName("gram");
-            weight.setUnitType("weight");
+            weight.setUnitType("g");
 
             Unit volume = new Unit();
             volume.setId(UUID.randomUUID());
-            volume.setUnitName("L");
-            volume.setUnitType("volume");
+            volume.setUnitName("liter");
+            volume.setUnitType("l");
 
             // Save the Units to the database
             repository.save(length);
