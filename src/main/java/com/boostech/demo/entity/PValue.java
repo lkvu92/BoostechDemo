@@ -21,6 +21,10 @@ public class PValue extends BaseEntity {
 	@JoinColumn(name = "attribute_id")
 	private Attribute attribute;
 	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "category_id")
+	private Category category;
+	
     @Column(name = "value")
 	private String value;
 }
