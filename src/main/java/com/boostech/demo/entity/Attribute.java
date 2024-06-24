@@ -1,9 +1,6 @@
 package com.boostech.demo.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,15 +14,14 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "attribute")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Attribute extends BaseEntity {
     @Column(name = "name", unique = false, nullable = false)
     private String attributeName;
 
-    @JsonBackReference
-    @ManyToMany(mappedBy = "attributes")
-    private List<Category> categories = new ArrayList<>();
+    @JsonManagedReference
+    @OneToMany(mappedBy = "attribute")
+    private List<CategoryAttribute> categoryAttributes = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Unit unit;

@@ -1,7 +1,9 @@
 package com.boostech.demo.controller;
 
-import com.boostech.demo.dto.reqDto.CategoryRequestDTO;
-import com.boostech.demo.dto.resDto.CategoryResponseDto;
+import com.boostech.demo.dto.reqDto.AddAttributeToCategoryDto;
+import com.boostech.demo.dto.reqDto.category.CategoryRequestDTO;
+import com.boostech.demo.dto.reqDto.category.RemoveAttributeFromCategoryDto;
+import com.boostech.demo.dto.resDto.category.GetAllCategoryResponseDto;
 import com.boostech.demo.entity.Category;
 import com.boostech.demo.service.CategoryService;
 import com.boostech.demo.util.CustomResponse;
@@ -25,14 +27,14 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<CustomResponse<List<CategoryResponseDto>>> getAllCategories() {
-        List<CategoryResponseDto> categories = categoryService.getAllCategories();
+    public ResponseEntity<CustomResponse<List<GetAllCategoryResponseDto>>> getAllCategories() {
+        List<GetAllCategoryResponseDto> categories = categoryService.getAllCategories();
         if (categories.isEmpty()) {
-            CustomResponse<List<CategoryResponseDto>> response = new CustomResponse<>
+            CustomResponse<List<GetAllCategoryResponseDto>> response = new CustomResponse<>
                     ("No categories found", HttpStatus.NOT_FOUND.value(), null);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
-        CustomResponse<List<CategoryResponseDto>> response = new CustomResponse<>
+        CustomResponse<List<GetAllCategoryResponseDto>> response = new CustomResponse<>
                 (SUCCESS_MESSAGE, HttpStatus.OK.value(), categories);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -57,14 +59,14 @@ public class CategoryController {
     }
 
     @GetMapping("/getOneWithoutAttributes/{id}")
-    public ResponseEntity<CustomResponse<CategoryResponseDto>> getOneCategoryWithoutAttributes(@PathVariable UUID id) {
-        Optional<CategoryResponseDto> categoryOpt = categoryService.getOneCategoryWithoutAttributes(id);
+    public ResponseEntity<CustomResponse<GetAllCategoryResponseDto>> getOneCategoryWithoutAttributes(@PathVariable UUID id) {
+        Optional<GetAllCategoryResponseDto> categoryOpt = categoryService.getOneCategoryWithoutAttributes(id);
         if (categoryOpt.isPresent()) {
-            CustomResponse<CategoryResponseDto> response = new CustomResponse<>
+            CustomResponse<GetAllCategoryResponseDto> response = new CustomResponse<>
                     (SUCCESS_MESSAGE, HttpStatus.OK.value(), categoryOpt.get());
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
-        CustomResponse<CategoryResponseDto> response = new CustomResponse<>
+        CustomResponse<GetAllCategoryResponseDto> response = new CustomResponse<>
                 ("Category not found", HttpStatus.NOT_FOUND.value(), null);
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
@@ -121,45 +123,30 @@ public class CategoryController {
         }
     }
 
-    /**
-     * Add attributes to category
-     *
-     * @param id category id
-     * @param categoryRequestDTO category data
-     * @return category
-     */
-    @PostMapping("/addAttributes/{id}")
-    public ResponseEntity<CustomResponse<Category>> addAttributesToCategory(@PathVariable UUID id, @RequestBody CategoryRequestDTO categoryRequestDTO) {
+
+    @PostMapping("/addAttributes/{categoryId}")
+    public  ResponseEntity<CustomResponse<String>> addAttributeToCategory (@PathVariable UUID categoryId,@RequestBody AddAttributeToCategoryDto dto){
         try {
-            Category category = categoryService.addAttributesToCategory(id, categoryRequestDTO.getAttributeIds());
-            CustomResponse<Category> response = new CustomResponse<>(SUCCESS_MESSAGE, HttpStatus.OK.value(), category);
+            categoryService.addAttributeToCategory(categoryId, dto);
+            CustomResponse<String> response = new CustomResponse<>
+                    ("Attribute added successfully", HttpStatus.OK.value(), null);
             return new ResponseEntity<>(response, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            CustomResponse<Category> response = new CustomResponse<>
+        }
+        catch (RuntimeException e){
+            CustomResponse<String> response = new CustomResponse<>
                     (e.getMessage(), HttpStatus.BAD_REQUEST.value(), null);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
 
-    /**
-     * Remove attributes from category
-     *
-     * @param id category id
-     * @param categoryRequestDTO category data
-     * @return category
-     */
-    @DeleteMapping("/removeAttributes/{id}")
-    public ResponseEntity<CustomResponse<Category>> removeAttributesFromCategory(
-            @PathVariable UUID id,
-            @RequestBody CategoryRequestDTO categoryRequestDTO) {
+    @DeleteMapping("/removeAttributes/{categoryId}")
+    public ResponseEntity<CustomResponse<String>> removeAttributesFromCategory(@PathVariable UUID categoryId, @RequestBody RemoveAttributeFromCategoryDto dto) {
         try {
-            Category category = categoryService.removeAttributesFromCategory(id, categoryRequestDTO.getAttributeIds());
-            CustomResponse<Category> response = new CustomResponse<>
-                    (SUCCESS_MESSAGE, HttpStatus.OK.value(), category);
+            categoryService.removeAttributesFromCategory(categoryId, dto);
+            CustomResponse<String> response = new CustomResponse<>("Attributes removed successfully", HttpStatus.OK.value(), null);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (RuntimeException e) {
-            CustomResponse<Category> response = new CustomResponse<>
-                    (e.getMessage(), HttpStatus.BAD_REQUEST.value(), null);
+            CustomResponse<String> response = new CustomResponse<>(e.getMessage(), HttpStatus.BAD_REQUEST.value(), null);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }

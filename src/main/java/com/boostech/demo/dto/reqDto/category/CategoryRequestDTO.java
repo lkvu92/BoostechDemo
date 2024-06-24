@@ -1,4 +1,4 @@
-package com.boostech.demo.dto.reqDto;
+package com.boostech.demo.dto.reqDto.category;
 
 import lombok.Data;
 
@@ -10,3 +10,4 @@ public class CategoryRequestDTO {
     private String name;
     private List<UUID> attributeIds;
 }
+

@@ -1,16 +1,18 @@
 package com.boostech.demo.service;
 
-import com.boostech.demo.dto.AttributeIdValueUnitTuple;
-import com.boostech.demo.dto.FindAllProductByCategoryIdAndAttributeIdValueUnitTuplesDto;
-import com.boostech.demo.dto.reqDto.CategoryRequestDTO;
-import com.boostech.demo.dto.resDto.CategoryResponseDto;
-import com.boostech.demo.dto.resDto.FindAllProductByCategoryIdAndAttributeIdAndValueResponse;
+import com.boostech.demo.dto.reqDto.AddAttributeToCategoryDto;
+import com.boostech.demo.dto.reqDto.category.CategoryRequestDTO;
+import com.boostech.demo.dto.reqDto.category.RemoveAttributeFromCategoryDto;
+import com.boostech.demo.dto.resDto.AttributeResponseDto;
+import com.boostech.demo.dto.resDto.category.GetAllCategoryResponseDto;
 import com.boostech.demo.entity.Attribute;
 import com.boostech.demo.entity.Category;
+import com.boostech.demo.entity.CategoryAttribute;
 import com.boostech.demo.exception.attribute.AttributeAlreadyAddedException;
 import com.boostech.demo.exception.attribute.AttributeNotFoundException;
 import com.boostech.demo.exception.category.CategoryNotFoundException;
 import com.boostech.demo.repository.AttributeRepository;
+import com.boostech.demo.repository.CategoryAttributeRepository;
 import com.boostech.demo.repository.CategoryRepository;
 import com.boostech.demo.util.CategoryToCategoryResponseDtoConverter;
 import org.springframework.stereotype.Service;
@@ -25,11 +27,14 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final AttributeRepository attributeRepository;
     private final CategoryToCategoryResponseDtoConverter converter;
+    private final CategoryAttributeRepository categoryAttributeRepository;
     private final PValueService pValueService;
     private static final String CATEGORY_NOT_FOUND = "Category not found";
 
-    public CategoryService(CategoryRepository categoryRepository, AttributeRepository attributeRepository, CategoryToCategoryResponseDtoConverter converter, PValueService pValueService) {
+
+    public CategoryService(CategoryRepository categoryRepository, CategoryAttributeRepository  categoryAttributeRepository,AttributeRepository attributeRepository, CategoryToCategoryResponseDtoConverter converter, PValueService pValueService) {
         this.categoryRepository = categoryRepository;
+        this.categoryAttributeRepository = categoryAttributeRepository;
         this.attributeRepository = attributeRepository;
         this.converter = converter;
         this.pValueService = pValueService;
@@ -39,16 +44,29 @@ public class CategoryService {
      * Get all categories
      * @return
      */
-    public List<CategoryResponseDto> getAllCategories() {
+    public List<GetAllCategoryResponseDto> getAllCategories() {
         List<Category> categories = categoryRepository.findAll();
-        List<CategoryResponseDto> categoryDtos = new ArrayList<>();
+        List<GetAllCategoryResponseDto> categoryDtos = new ArrayList<>();
         for (Category category : categories) {
-            CategoryResponseDto dto = new CategoryResponseDto();
+            GetAllCategoryResponseDto dto = new GetAllCategoryResponseDto();
             dto.setId(category.getId());
             dto.setCreatedAt(category.getCreatedAt());
             dto.setUpdatedAt(category.getUpdatedAt());
             dto.setDeletedAt(category.getDeletedAt());
             dto.setName(category.getName());
+
+            // Add the attributes to the response
+            List<AttributeResponseDto> attributeDtos = new ArrayList<>();
+            for (CategoryAttribute categoryAttribute : category.getCategoryAttributes()) {
+                Attribute attribute = categoryAttribute.getAttribute();
+                AttributeResponseDto attributeDto = new AttributeResponseDto();
+                attributeDto.setId(attribute.getId());
+                attributeDto.setName(attribute.getAttributeName());
+                attributeDto.setIsRequired(categoryAttribute.getIsRequired());
+                attributeDtos.add(attributeDto);
+            }
+//            dto.setAttributes(attributeDtos);
+
             categoryDtos.add(dto);
         }
         return categoryDtos;
@@ -56,14 +74,19 @@ public class CategoryService {
 
     /**
      * Get category by id
-     * @param id UUID
+     * @param id
      * @return
      */
     public Optional<Category> getCategoryById(UUID id) {
         return categoryRepository.findById(id);
     }
 
-    public Optional<CategoryResponseDto> getOneCategoryWithoutAttributes(UUID id) {
+    /**
+     * Get category by id without attributes
+     * @param id
+     * @return
+     */
+    public Optional<GetAllCategoryResponseDto> getOneCategoryWithoutAttributes(UUID id) {
         Optional<Category> category = categoryRepository.getOneWithoutAttributes(id);
         return category.map(converter::convert);
     }
@@ -115,92 +138,67 @@ public class CategoryService {
         }
     }
 
-    /**
-     * Add attributes to a category
-     * @param categoryId UUID
-     * @param attributeIds List of UUID
-     * @return
-     */
     @Transactional
-    public Category addAttributesToCategory(UUID categoryId, List<UUID> attributeIds) {
-        return modifyAttributesInCategory(categoryId, attributeIds, true);
-    }
-
-    /**
-     * Remove attributes from a category
-     * @param categoryId UUID
-     * @param attributeIds List of UUID
-     * @return
-     */
-    @Transactional
-    public Category removeAttributesFromCategory(UUID categoryId, List<UUID> attributeIds) {
-        Optional<Category> category = getCategoryById(categoryId);
-        if (category.isEmpty()) {
+    public void addAttributeToCategory(UUID categoryId, AddAttributeToCategoryDto dto) {
+        Optional<Category> categoryOpt = categoryRepository.findById(categoryId);
+        if (categoryOpt.isEmpty()) {
             throw new CategoryNotFoundException(CATEGORY_NOT_FOUND);
         }
-        for (UUID attributeId : attributeIds) {
-            FindAllProductByCategoryIdAndAttributeIdValueUnitTuplesDto dto = new FindAllProductByCategoryIdAndAttributeIdValueUnitTuplesDto();
-            dto.setCategoryId(categoryId);
-            dto.setAttributeIdValueUnitTuples(Collections.singletonList(new AttributeIdValueUnitTuple(attributeId, "%%")));
-            List<FindAllProductByCategoryIdAndAttributeIdAndValueResponse> products = pValueService.findAllProductByCategoryIdAndAttributeIdAndValue(dto, false);
-            if (products.isEmpty()) {
-                modifyAttributeInCategory(category.get(), attributeId, false);
-            }
+        Category category = categoryOpt.get();
+        Map<UUID, Boolean> map = new HashMap<>();
+        for (AddAttributeToCategoryDto.Attribute attribute : dto.getAttributes()) {
+            map.put(attribute.getId(), attribute.getIsRequired());
         }
-        return categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException(CATEGORY_NOT_FOUND));
-    }
 
-    /**
-     * Modify attributes in category
-     * @param categoryId
-     * @param attributeIds
-     * @param isAdding
-     * @return
-     */
-    private Category modifyAttributesInCategory(UUID categoryId, List<UUID> attributeIds, boolean isAdding) {
-        Category category = getCategoryOrThrow(categoryId);
-        attributeIds.forEach(attributeId -> modifyAttributeInCategory(category, attributeId, isAdding));
-        return categoryRepository.save(category);
-    }
+        List<Attribute> attributes = attributeRepository.findAllByIdIn(map.keySet().stream().toList());
 
-    /**
-     * Modify attribute in category
-     * @param category
-     * @param attributeId
-     * @param isAdding
-     */
-    private void modifyAttributeInCategory(Category category, UUID attributeId, boolean isAdding) {
-        Attribute attribute = getAttributeOrThrow(attributeId);
-        if (isAdding) {
-            if (category.getAttributes().contains(attribute)) {
-                throw new AttributeAlreadyAddedException("Attribute with ID " + attributeId +" - "+ " already added to the category");
-            }
-            category.addAttribute(attribute);
-        } else {
-            if (!category.getAttributes().contains(attribute)) {
-                throw new AttributeNotFoundException("Attribute with ID " + attributeId +" - "+ " not found in the category");
-            }
-            category.removeAttribute(attribute);
+        if (attributes.size() != map.size()) {
+            throw new AttributeNotFoundException("Attribute not found");
         }
+
+        Map<UUID, Attribute> map1 = new HashMap<>();
+        for (Attribute attribute : attributes) {
+            map1.put(attribute.getId(), attribute);
+        }
+
+        for (AddAttributeToCategoryDto.Attribute attribute : dto.getAttributes()) {
+            // Check if the attribute already exists in the category
+            boolean attributeExists = category.getCategoryAttributes().stream()
+                    .anyMatch(ca -> ca.getAttribute().getId().equals(attribute.getId()));
+            if (attributeExists) {
+                throw new AttributeAlreadyAddedException("Attribute already exists in the category");
+            }
+
+            CategoryAttribute categoryAttribute =  new CategoryAttribute();
+            categoryAttribute.setCategory(category);
+            categoryAttribute.setIsRequired(map.get(attribute.getId()));
+            categoryAttribute.setAttribute(map1.get(attribute.getId()));
+
+            categoryAttributeRepository.save(categoryAttribute);
+            category.getCategoryAttributes().add(categoryAttribute);
+        }
+
+        categoryRepository.save(category);
     }
 
-    /**
-     * Get category by id or throw exception
-     * @param categoryId UUID
-     * @return
-     */
-    private Category getCategoryOrThrow(UUID categoryId) {
-        return categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException(CATEGORY_NOT_FOUND));
-    }
-
-    /**
-     * Get attribute by id or throw exception
-     * @param attributeId
-     * @return
-     */
-    private Attribute getAttributeOrThrow(UUID attributeId) {
-        return attributeRepository.findById(attributeId)
-                .orElseThrow(() -> new RuntimeException("Attribute not found"));
+    @Transactional
+    public void removeAttributesFromCategory(UUID categoryId, RemoveAttributeFromCategoryDto dto) {
+        Optional<Category> categoryOpt = categoryRepository.findById(categoryId);
+        if (categoryOpt.isEmpty()) {
+            throw new CategoryNotFoundException(CATEGORY_NOT_FOUND);
+        }
+        Category category = categoryOpt.get();
+        for (UUID attributeId : dto.getAttributeIds()) {
+            Optional<CategoryAttribute> categoryAttributeOpt = category.getCategoryAttributes().stream()
+                    .filter(ca -> ca.getAttribute().getId().equals(attributeId))
+                    .findFirst();
+            if (categoryAttributeOpt.isEmpty()) {
+                throw new AttributeNotFoundException("Attribute not found");
+            }
+            CategoryAttribute categoryAttribute = categoryAttributeOpt.get();
+            category.getCategoryAttributes().remove(categoryAttribute);
+            categoryAttributeRepository.delete(categoryAttribute);
+        }
+        categoryRepository.save(category);
     }
 }
