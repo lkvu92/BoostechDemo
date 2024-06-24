@@ -1,27 +1,14 @@
 package com.boostech.demo.product;
 
 import com.boostech.demo.dto.GetOneProductDto;
-import com.boostech.demo.entity.*;
-import com.boostech.demo.repository.CategoryRepository;
-import com.boostech.demo.repository.IAttributeRepository;
-import com.boostech.demo.repository.PValueRepository;
-import com.boostech.demo.repository.ProductRepository;
-import com.boostech.demo.service.IPValueService;
 import com.boostech.demo.service.ProductService;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
 import java.util.List;
 import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 
 @SpringBootTest
 @Transactional
@@ -40,9 +27,6 @@ public class ProductTest {
         );
         List<GetOneProductDto.AttributeDto> attributes = List.of(attribute);
         GetOneProductDto dto = new GetOneProductDto(UUID.fromString("e6f5392b-7e0a-4047-b02c-edff8ac73df2"), "Cutting Machine", category, attributes);
-
-//       given(productService.getOneProductDtos(UUID.fromString("e6f5392b-7e0a-4047-b02c-edff8ac73df2")))
-//                .willReturn(dto);
 
        assertThat(productService.getOneProductDtos(UUID.fromString("e6f5392b-7e0a-4047-b02c-edff8ac73df2")).getName()).isEqualTo(dto.getName());
 

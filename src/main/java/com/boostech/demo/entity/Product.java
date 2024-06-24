@@ -18,6 +18,7 @@ public class Product extends BaseEntity {
     @Column(name = "name", length = 255)
     private String name;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cate_id")
     private Category category;
