@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,7 +25,11 @@ public class AttributeService implements IAttributeService {
     private IUnitRepository unitRepository;
 
     public List<Attribute> getAll() {
-        return repository.findAll();
+        try{
+            return repository.findAll();
+        }catch (EntityNotFoundException e){
+            throw new EntityNotFoundException(e.getMessage());
+        }
     }
 
     public Attribute getById(UUID id) {
@@ -42,6 +45,7 @@ public class AttributeService implements IAttributeService {
         try {
             Attribute attribute = new Attribute();
             attribute.setAttributeName(attributeDto.getAttributeName());
+            attribute.setActive(true);
 
             Unit unit = unitRepository.findById(attributeDto.getUnitId()).orElseThrow();
             attribute.setUnit(unit);
@@ -60,9 +64,10 @@ public class AttributeService implements IAttributeService {
             }
 
             existingAttribute.setAttributeName(attributeDto.getAttributeName());
+            existingAttribute.setActive(true);
             Unit unit = unitRepository.findById(attributeDto.getUnitId()).orElseThrow();
 
-            existingAttribute.setUnit(unit); // Thêm Unit mới
+            existingAttribute.setUnit(unit);
             return repository.save(existingAttribute);
 
         }catch (EntityNotFoundException e){
@@ -72,11 +77,12 @@ public class AttributeService implements IAttributeService {
 
     public void delete(UUID id) {
         Attribute existingAttribute = getById(id);
-        if(existingAttribute == null){
+        if(existingAttribute == null) {
             throw new EntityNotFoundException("Attribute not found.");
         }
 
+        existingAttribute.setActive(false);
         existingAttribute.setDeletedAt(LocalDateTime.now());
-        repository.delete(existingAttribute);
+        repository.save(existingAttribute);
     }
 }

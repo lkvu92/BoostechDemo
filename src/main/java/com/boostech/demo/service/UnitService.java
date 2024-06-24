@@ -18,7 +18,11 @@ public class UnitService implements IUnitService {
     private final IUnitRepository repository;
 
     public List<Unit> getAll() {
-        return repository.findAll();
+        try{
+            return repository.findAll();
+        }catch (EntityNotFoundException e){
+            throw new EntityNotFoundException(e.getMessage());
+        }
     }
 
     public Unit getById(UUID id) {
@@ -34,7 +38,7 @@ public class UnitService implements IUnitService {
     public Unit create(UnitDto unitDto) {
         try {
             Unit unit = new Unit();
-            unit.setUnitName(UUID.randomUUID().toString());
+            unit.setUnitName(unitDto.getUnitName());
             unit.setUnitType(unitDto.getUnitType());
 
             return repository.save(unit);
@@ -47,10 +51,13 @@ public class UnitService implements IUnitService {
        try {
            Unit existingUnit = getById(id);
            if (existingUnit == null) {
-               throw new EntityNotFoundException("Unit not found");
+               throw new EntityNotFoundException("Unit with id " + id + " not found");
            }
 
-           existingUnit.setUnitName(UUID.randomUUID().toString());
+           if(existingUnit.getUnitName().equals(unitDto.getUnitName())) {
+               existingUnit.setUnitName(existingUnit.getUnitName());
+           }
+
            existingUnit.setUnitType(unitDto.getUnitType());
            existingUnit.setDeletedAt(LocalDateTime.now());
            return repository.save(existingUnit);
@@ -63,8 +70,9 @@ public class UnitService implements IUnitService {
     public void delete(UUID id) {
         Unit existingUnit = getById(id);
         if (existingUnit == null) {
-            throw new EntityNotFoundException("Unit not found");
+            throw new EntityNotFoundException("Unit with id " + id + " not found");
         }
+
         existingUnit.setDeletedAt(LocalDateTime.now());
         repository.delete(existingUnit);
     }

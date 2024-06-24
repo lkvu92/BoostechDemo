@@ -16,7 +16,7 @@ public class Unit extends BaseEntity {
     @Column(name = "name", unique = true, nullable = false)
     private String unitName;
 
-    @Column(name = "unit_type", nullable = false)
+    @Column(name = "unit_type", nullable = true)
     private String unitType;
 
     @OneToMany(mappedBy = "unit", cascade = CascadeType.ALL)

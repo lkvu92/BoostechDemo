@@ -55,7 +55,7 @@ public class UnitController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> createUnit(@Valid  @RequestBody UnitDto unitDto, BindingResult bindingResult) {
+    public ResponseEntity<?> createUnit(@Valid @RequestBody UnitDto unitDto, BindingResult bindingResult) {
         try {
             if (bindingResult.hasErrors()) {
                 List<String> errorMessages = bindingResult.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
@@ -63,10 +63,10 @@ public class UnitController {
             }
 
             Unit unit = unitService.create(unitDto);
+            return ResponseEntity.ok().body("Created unit successfully.");
 
-            return ResponseEntity.ok(unit);
         }catch (EntityExistsException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Unit type already exists.");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Unit's name already exists.");
         }
     }
 
@@ -84,9 +84,10 @@ public class UnitController {
             }
 
             Unit unit = unitService.update(id, unitDto);
-            return ResponseEntity.ok(unit);
+            return ResponseEntity.ok().body("Updated unit successfully.");
+
         }catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(UNIT_NOT_FOUND);
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

@@ -9,7 +9,11 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UnitDto {
-    @NotBlank(message = "unitType is required.")
+    @NotBlank(message = "Unit's name is required.")
+    private String unitName;
+
+    @NotBlank(message = "Unit's type is required.")
     private String unitType;
+
     private boolean isActive = true;
 }

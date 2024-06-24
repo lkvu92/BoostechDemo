@@ -1,9 +1,6 @@
 package com.boostech.demo.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,10 +20,14 @@ public class Attribute extends BaseEntity {
     @Column(name = "name", unique = false, nullable = false)
     private String attributeName;
 
+    @Column(name = "is_active")
+    private boolean isActive;
+
     @JsonBackReference
     @ManyToMany(mappedBy = "attributes")
     private List<Category> categories = new ArrayList<>();
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     private Unit unit;
 

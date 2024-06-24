@@ -12,7 +12,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AttributeDto {
-    @NotBlank(message = "Attribute is required.")
+    @NotBlank(message = "Attribute's name is required.")
     private String attributeName;
     private UUID unitId;
 
