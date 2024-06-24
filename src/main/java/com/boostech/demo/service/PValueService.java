@@ -15,6 +15,7 @@ import com.boostech.demo.dto.resDto.FindPValuesByProductIdList;
 import org.springframework.stereotype.Service;
 
 import com.boostech.demo.entity.Attribute;
+import com.boostech.demo.entity.Category;
 import com.boostech.demo.entity.PValue;
 import com.boostech.demo.entity.Product;
 import com.boostech.demo.exception.AttributeNotFoundException;
@@ -124,10 +125,9 @@ public class PValueService implements IPValueService {
 			boolean includeDeleted
 	) {
 		StringBuilder sqlStringBuilder = new StringBuilder("select p from Product p\r\n"
-				+ "join Category c on c.id = p.category.id\r\n"
 				+ "join PValue v on v.product.id = p.id\r\n"
 				+ "join Attribute a on a.id = v.attribute.id\r\n"
-				+ "where p.category.id = :categoryId\r\n");
+				+ "where v.category_id = :categoryId\r\n");
 		
 		if (!includeDeleted) {
 			sqlStringBuilder.append("and p.deletedAt is null\r\n");
@@ -203,8 +203,9 @@ public class PValueService implements IPValueService {
 		
 		Product product = productOptional.get();
 		Attribute attribute = attributeOptional.get();
+		Category category = product.getCategory();
 		
-		PValue value = new PValue(product, attribute, dto.getValue());
+		PValue value = new PValue(product, attribute, category, dto.getValue());
 		
 		_pValueRepository.save(value);
 	}
@@ -322,10 +323,12 @@ public class PValueService implements IPValueService {
 			String value = tuple.getValue();
 			Attribute attribute = tuple.getAttribute();
 			PValue pValue = new PValue();
+			Category category = tuple.getCategory();
 
 			pValue.setProduct(product);
 			pValue.setAttribute(attribute);
 			pValue.setValue(value);
+			pValue.setCategory(category);
 
 			product.getValues().add(pValue);
 		}
