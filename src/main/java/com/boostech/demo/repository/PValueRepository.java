@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.boostech.demo.entity.Attribute;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -66,7 +67,11 @@ public interface PValueRepository extends JpaRepository<PValue, UUID> {
 			@Param(value = "id") UUID id, 
 			@Param("includeDeleted") 
 			boolean includeDeleted);
-	
-//	@Procedure(procedureName = "FILTER_PRODUCT")
-//	void filterProduct(Map<String, String> map);
+
+	@Query("select v from PValue v join fetch v.attribute "
+			+ "where v.product.id = :productId "
+			+ "and (:includeDeleted = true or v.deletedAt is null)")
+	List<PValue> findAllByProductId(
+			@Param("productId") UUID productId,
+			@Param("includeDeleted") boolean includeDeleted);
 }

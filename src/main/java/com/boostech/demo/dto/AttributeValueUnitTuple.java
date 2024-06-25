@@ -13,5 +13,5 @@ import lombok.NoArgsConstructor;
 public class AttributeValueUnitTuple {
     private Attribute attribute;
     private String value;
-    private Category category;
+    private String status;
 }

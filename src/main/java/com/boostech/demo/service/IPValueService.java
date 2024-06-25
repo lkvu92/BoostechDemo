@@ -9,6 +9,7 @@ import com.boostech.demo.dto.resDto.FindPValueByIdResponse;
 import com.boostech.demo.dto.resDto.FindPValueByProductIdAndAttributeIdResponse;
 import com.boostech.demo.dto.resDto.FindPValuesByAttributeIdList;
 import com.boostech.demo.dto.resDto.FindPValuesByProductIdList;
+import com.boostech.demo.entity.Category;
 import com.boostech.demo.entity.Product;
 
 public interface IPValueService {
@@ -35,5 +36,8 @@ public interface IPValueService {
 	boolean deleteValueById(UUID id);
 	boolean deleteValueByProductIdAndAttributeId(DeleteValueByProductIdAndAttributeIdDto dto);
 
-	void createValueByProductIdAndAttributeIdValueUnitTuples(Product product, List<AttributeValueUnitTuple> attributeIdValueUnitTuples);
+	void createValueByProductIdAndAttributeIdValueUnitTuples(Product product, Category category, List<AttributeValueUnitTuple> attributeIdValueUnitTuples);
+
+	void updateValueByProductIdAndAttributeIdValueUnitTuples(Product product, List<UpdateValueByProductIdAndAttributeIdDto> updateValueByProductIdAndAttributeIdDtos);
+	void update(Product product, Category category, List<AttributeValueUnitTuple> attributeIdValueUnitTuples);
 }

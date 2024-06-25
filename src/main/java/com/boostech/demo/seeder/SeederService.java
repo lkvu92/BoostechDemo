@@ -54,20 +54,22 @@ public class SeederService {
 
     public String CategoryAttributeSeeder() {
         try {
-            List<Cat_Attr> list_cate_atr = new ArrayList<>();
-            list_cate_atr.add(new Cat_Attr(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000001")));
-            list_cate_atr.add(new Cat_Attr(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002")));
-            list_cate_atr.add(new Cat_Attr(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000003")));
-            list_cate_atr.add(new Cat_Attr(UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000002")));
-            list_cate_atr.add(new Cat_Attr(UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000003")));
-            list_cate_atr.add(new Cat_Attr(UUID.fromString("00000000-0000-0000-0000-000000000003"), UUID.fromString("00000000-0000-0000-0000-000000000002")));
-            list_cate_atr.add(new Cat_Attr(UUID.fromString("00000000-0000-0000-0000-000000000003"), UUID.fromString("00000000-0000-0000-0000-000000000003")));
-            list_cate_atr.add(new Cat_Attr(UUID.fromString("00000000-0000-0000-0000-000000000003"), UUID.fromString("00000000-0000-0000-0000-000000000004")));
-            list_cate_atr.add(new Cat_Attr(UUID.fromString("00000000-0000-0000-0000-000000000003"), UUID.fromString("00000000-0000-0000-0000-000000000005")));
-            for (Cat_Attr cate_atr : list_cate_atr) {
-                entityManager.createNativeQuery("INSERT INTO category_attribute (category_id, attribute_id) VALUES (?, ?)")
-                        .setParameter(1, cate_atr.getCategory_id())
-                        .setParameter(2, cate_atr.getAttribute_id())
+            List<CategoryAttributeType> list_cate_atr = new ArrayList<>();
+            list_cate_atr.add(new CategoryAttributeType(UUID.fromString("00000000-0000-0000-0000-000000000001"),UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000001"),true));
+            list_cate_atr.add(new CategoryAttributeType(UUID.fromString("00000000-0000-0000-0000-000000000002"),UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002"),true));
+            list_cate_atr.add(new CategoryAttributeType(UUID.fromString("00000000-0000-0000-0000-000000000003"),UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000003"),true));
+            list_cate_atr.add(new CategoryAttributeType(UUID.fromString("00000000-0000-0000-0000-000000000004"),UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000002"),true));
+            list_cate_atr.add(new CategoryAttributeType(UUID.fromString("00000000-0000-0000-0000-000000000005"),UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000003"),true));
+            list_cate_atr.add(new CategoryAttributeType(UUID.fromString("00000000-0000-0000-0000-000000000006"),UUID.fromString("00000000-0000-0000-0000-000000000003"), UUID.fromString("00000000-0000-0000-0000-000000000002"),true));
+            list_cate_atr.add(new CategoryAttributeType(UUID.fromString("00000000-0000-0000-0000-000000000007"),UUID.fromString("00000000-0000-0000-0000-000000000003"), UUID.fromString("00000000-0000-0000-0000-000000000003"),true));
+            list_cate_atr.add(new CategoryAttributeType(UUID.fromString("00000000-0000-0000-0000-000000000008"),UUID.fromString("00000000-0000-0000-0000-000000000003"), UUID.fromString("00000000-0000-0000-0000-000000000004"),false));
+            list_cate_atr.add(new CategoryAttributeType(UUID.fromString("00000000-0000-0000-0000-000000000009"),UUID.fromString("00000000-0000-0000-0000-000000000003"), UUID.fromString("00000000-0000-0000-0000-000000000005"),false));
+            for (CategoryAttributeType cate_atr : list_cate_atr) {
+                entityManager.createNativeQuery("INSERT INTO category_attribute (id, category_id, attribute_id, is_required) VALUES (?, ?, ?, ?)")
+                        .setParameter(1, cate_atr.getId())
+                        .setParameter(2, cate_atr.getCategory_id())
+                        .setParameter(3, cate_atr.getAttribute_id())
+                        .setParameter(4, cate_atr.is_required())
                         .executeUpdate();
             }
             return "Category_Attribute data Seeded run successfully";
@@ -303,5 +305,15 @@ public class SeederService {
     private static class CategoryType {
         private UUID id;
         private String name;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    private static class CategoryAttributeType {
+        private UUID id;
+        private UUID category_id;
+        private UUID attribute_id;
+        boolean is_required;
     }
 }

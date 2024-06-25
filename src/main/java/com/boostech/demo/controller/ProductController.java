@@ -2,7 +2,9 @@ package com.boostech.demo.controller;
 
 import com.boostech.demo.dto.CustomProductResponse;
 import com.boostech.demo.dto.GetOneProductDto;
+import com.boostech.demo.dto.ProductUpdateDto;
 import com.boostech.demo.dto.reqDto.ProductCreateDto;
+import com.boostech.demo.dto.resDto.FindAllProductCustom;
 import com.boostech.demo.entity.Product;
 import com.boostech.demo.service.ProductService;
 import com.boostech.demo.util.CustomResponse;
@@ -21,12 +23,12 @@ public class ProductController extends BaseController{
     private final ProductService productService;
 
     @GetMapping()
-    public ResponseEntity<CustomResponse<List<Product>>> getAllProducts() {
+    public ResponseEntity<CustomResponse<List<FindAllProductCustom>>> getAllProducts() {
         return new ResponseEntity<>(new CustomResponse<>("Success", 200, productService.getAllProducts()), HttpStatus.OK);
     }
 
     @GetMapping("/advanced")
-    public CustomResponse<CustomProductResponse<Product>> getProductsAdvanced(
+    public CustomResponse<CustomProductResponse<FindAllProductCustom>> getProductsAdvanced(
             @RequestParam(required = false) String name,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int limit,
@@ -91,7 +93,7 @@ public class ProductController extends BaseController{
         return new ResponseEntity<>(new CustomResponse<>("Product created successfully", 201, null), HttpStatus.CREATED);
     }
     @PutMapping("/{id}")
-    public ResponseEntity<CustomResponse<Void>> updateProduct(@PathVariable UUID id, @RequestBody ProductCreateDto productCreateDto)  {
+    public ResponseEntity<CustomResponse<Void>> updateProduct(@PathVariable UUID id, @RequestBody ProductUpdateDto productCreateDto)  {
         productService.updateProductWithAttributes(productCreateDto, id);
 
         return new ResponseEntity<>(new CustomResponse<>("Product updated successfully", 200, null), HttpStatus.OK);

@@ -2,6 +2,7 @@ package com.boostech.demo.service;
 
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -318,22 +319,103 @@ public class PValueService implements IPValueService {
 	}
 
 	@Override
-	public void createValueByProductIdAndAttributeIdValueUnitTuples(Product product, List<AttributeValueUnitTuple> attributeIdValueUnitTuples) {
+	public void createValueByProductIdAndAttributeIdValueUnitTuples(Product product, Category category, List<AttributeValueUnitTuple> attributeIdValueUnitTuples) {
 		for (AttributeValueUnitTuple tuple : attributeIdValueUnitTuples) {
 			String value = tuple.getValue();
 			Attribute attribute = tuple.getAttribute();
 			PValue pValue = new PValue();
-			Category category = tuple.getCategory();
 
 			pValue.setProduct(product);
 			pValue.setAttribute(attribute);
 			pValue.setValue(value);
 			pValue.setCategory(category);
-
 			product.getValues().add(pValue);
 		}
 
 		_productRepository.save(product);
 	}
 
+	public void update(Product product, Category category, List<AttributeValueUnitTuple> attributeIdValueUnitTuples) {
+		for (AttributeValueUnitTuple tuple : attributeIdValueUnitTuples) {
+			String value = tuple.getValue();
+			Attribute attribute = tuple.getAttribute();
+			String status = tuple.getStatus();
+
+			PValue pValue = null;
+
+			if (status.equals("create")) {
+				pValue = new PValue();
+				product.getValues().add(pValue);
+			}
+			else {
+				Optional<PValue> pValueOptional = _pValueRepository.findByProductIdAndAttributeId(product.getId(), attribute.getId(), true);
+
+				if (pValueOptional.isEmpty()) {
+					throw new PValueNotFoundException(attribute.getId(), product.getId());
+				}
+
+				pValue = pValueOptional.get();
+			}
+
+			pValue.setProduct(product);
+			pValue.setAttribute(attribute);
+			pValue.setValue(value);
+			pValue.setCategory(category);
+
+			if (pValue.getDeletedAt() != null) {
+				pValue.setDeletedAt(null);
+			}
+
+			if (status.equals("delete") && pValue.getDeletedAt() == null) {
+				pValue.setDeletedAt(LocalDateTime.now());
+			}
+		}
+
+		_productRepository.save(product);
+	}
+
+	@Override
+	public void updateValueByProductIdAndAttributeIdValueUnitTuples (Product product, List<UpdateValueByProductIdAndAttributeIdDto> dtos) {
+		List<PValue> pValues = new ArrayList<>();
+		List<PValue> pValuesOfProduct = _pValueRepository.findAllByProductId(product.getId(), false);
+		if (pValuesOfProduct.size()>dtos.size()){
+			List<UUID> attributeIds = new ArrayList<>();
+			for (PValue pValue : pValuesOfProduct) {
+				boolean found = false;
+				for (UpdateValueByProductIdAndAttributeIdDto dto : dtos) {
+					if (pValue.getAttribute().getId().equals(dto.getAttributeId())) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					attributeIds.add(pValue.getAttribute().getId());
+				}
+			}
+			for (UUID attributeId : attributeIds) {
+				DeleteValueByProductIdAndAttributeIdDto dto = new DeleteValueByProductIdAndAttributeIdDto(attributeId, product.getId());
+				deleteValueByProductIdAndAttributeId(dto);
+			}
+		}
+		for (UpdateValueByProductIdAndAttributeIdDto dto : dtos) {
+			UUID productId = product.getId(), attributeId = dto.getAttributeId();
+			Optional<PValue> valueOptional = _pValueRepository.findByProductIdAndAttributeId(productId,  attributeId, false);
+			if (valueOptional.isEmpty()) {
+				PValue newPValue = new PValue();
+				Attribute attribute = _attributeRepository.findById(attributeId).orElseThrow(() -> new AttributeNotFoundException(attributeId));
+				newPValue.setProduct(product);
+				newPValue.setAttribute(attribute);
+				newPValue.setValue(dto.getValue());
+				_pValueRepository.save(newPValue);
+			}else{
+				PValue value = valueOptional.get();
+				value.setValue(dto.getValue());
+				if(value.getDeletedAt() != null){
+					value.setDeletedAt(null);
+				}
+				pValues.add(value);
+			}
+		}
+		_pValueRepository.saveAll(pValues);
+	}
 }
