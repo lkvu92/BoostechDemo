@@ -359,15 +359,13 @@ public class PValueService implements IPValueService {
 
 			pValue.setProduct(product);
 			pValue.setAttribute(attribute);
-			pValue.setValue(value);
+			if (value != null) {
+				pValue.setValue(value);
+			}
 			pValue.setCategory(category);
 
-			if (pValue.getDeletedAt() != null) {
-				pValue.setDeletedAt(null);
-			}
-
-			if (status.equals("delete") && pValue.getDeletedAt() == null) {
-				pValue.setDeletedAt(LocalDateTime.now());
+			if (status.equals("delete")) {
+				_pValueRepository.deleteById(pValue.getId());
 			}
 		}
 

@@ -235,17 +235,18 @@ public class ProductService {
 
             AttributeValueUnitTuple attributeValueUnitTuple = new AttributeValueUnitTuple(attribute, value, status);
             attributeIdValueUnitTuples.add(attributeValueUnitTuple);
+
+            listAttributeOfCateMap.remove(attributeId);
         }
 
+        for (Map.Entry<UUID, AttributeWithStatusDto> entry : listAttributeOfCateMap.entrySet()) {
+            Attribute attribute = entry.getValue().getAttribute();
+            String status = entry.getValue().getStatus();
 
-        for (AttributeValueUnitTuple attributeValueUnitTuple : attributeIdValueUnitTuples) {
-            if (!listAttributeOfCateMap.containsKey(attributeValueUnitTuple.getAttribute().getId())) {
-
-            }
-            else {
-
-            }
+            AttributeValueUnitTuple attributeValueUnitTuple = new AttributeValueUnitTuple(attribute, null, status);
+            attributeIdValueUnitTuples.add(attributeValueUnitTuple);
         }
+
         pValueService.update(product, category, attributeIdValueUnitTuples);
     }
 
